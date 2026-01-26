@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:18
+    container_name: postgres-apsor-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5532:5432"
+    networks:
+      - backend
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-multi-db.sql:/docker-entrypoint-initdb.d/init.sql
+
+  pgadmin:
+    image: dpage/pgadmin4:9.11
+    container_name: pgAdmin-apsor-pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "6060:80"
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.2
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL_HOST: postgres
+      KC_DB_URL_DATABASE: ${POSTGRES_DB}
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    ports:
+      - "8443:8080"
+    networks:
+      - backend
+    depends_on:
+      - postgres
+      - pgadmin
+
+volumes:
+  pgdata:
+  pgadmin_data:
+
+networks:
+  backend:
+    driver: bridge
+
