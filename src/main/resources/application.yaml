@@ -32,10 +32,14 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URL}
 
 keycloak:
-  realm: apsor
+#  realm: ${KEYCLOAK_REALM_NAME}
+  realm: apsor-app
   public-client-id: ${KEYCLOAK_CLIENT_ID}
 
 app:
   frontend:
-    verify-redirect-uri: "${FRONTEND_URL}/email-verified"
+    verify-redirect-uri: "${FRONTEND_URL}"
+  auth:
+    cookie-secure: false         # true in production (HTTPS)
+    cookie-same-site: "None"      # "None" if frontend on different domain (must be Secure)
 

@@ -1,6 +1,7 @@
 package com.backend.apsor.entities;
 
 import com.backend.apsor.enums.UserStatus;
+import com.backend.apsor.enums.UserType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +33,9 @@ public class Users {
     private String firstName;
 
     private String lastName;
+
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
