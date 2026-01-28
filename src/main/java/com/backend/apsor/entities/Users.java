@@ -1,9 +1,10 @@
 package com.backend.apsor.entities;
 
 import com.backend.apsor.enums.UserStatus;
-import com.backend.apsor.enums.UserType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -11,14 +12,11 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "app_users",
-        uniqueConstraints = {
-                @UniqueConstraint(name = "uk_app_users_keycloak_user_id", columnNames = "keycloak_user_id"),
-                @UniqueConstraint(name = "uk_app_users_email", columnNames = "email")
-        })
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUser {
+@Data
+@Builder
+public class Users {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,26 +28,26 @@ public class AppUser {
     // Cached profile
     private String username;
     private String email;
-    private String firstName;
-    private String lastName;
 
-    @Enumerated(EnumType.STRING)
-    private UserType userType;
+    private String firstName;
+
+    private String lastName;
 
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;
 
     // Preferences
+    @Column(length = 30)
     private String phoneNumber;
+
+    @Column(length = 500,nullable = true)
     private String profileImageUrl;
 
     // Activity
+    @Column(nullable = true)
     private Instant lastLoginAt;
+    @Column(nullable = true)
     private Instant lastSeenAt;
-    private boolean isOnline;
-
-    // Lifecycle
-    private boolean onboardingCompleted = false;
 
     @CreationTimestamp
     private Instant createdAt;
@@ -57,6 +55,7 @@ public class AppUser {
     @UpdateTimestamp
     private Instant updatedAt;
 
+    @Column(nullable = true)
     private Instant deletedAt;
 
 }
