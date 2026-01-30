@@ -5,36 +5,31 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class KeycloakRoleConverter implements Converter<Jwt, Collection<GrantedAuthority>> {
-    private static final String RESOURCE_ACCESS_CLAIM = "resource_access";
-    private static final String ROLES_CLAIM = "roles";
-    private static final String CLIENT_ID = "apsor-authorization-code-flow";
+
+    private static final String REALM_ACCESS = "realm_access";
+    private static final String ROLES = "roles";
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt jwt) {
-        Map<String, Object> resourceAccess = jwt.getClaim(RESOURCE_ACCESS_CLAIM);
-        if (resourceAccess == null || !resourceAccess.containsKey(CLIENT_ID)) {
-            return Collections.emptyList();
+        Object realmAccessObj = jwt.getClaims().get(REALM_ACCESS);
+        if (!(realmAccessObj instanceof Map<?, ?> realmAccess)) {
+            return List.of();
         }
 
-        @SuppressWarnings("unchecked")
-        Map<String, Object> clientAccess = (Map<String, Object>) resourceAccess.get(CLIENT_ID);
-        @SuppressWarnings("unchecked")
-        List<String> roles = (List<String>) clientAccess.get(ROLES_CLAIM);
-
-        if (roles == null || roles.isEmpty()) {
-            return Collections.emptyList();
+        Object rolesObj = realmAccess.get(ROLES);
+        if (!(rolesObj instanceof Collection<?> roles)) {
+            return List.of();
         }
 
         return roles.stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
-                .collect(Collectors.toList());
+                .filter(Objects::nonNull)
+                .map(Object::toString)
+                .map(r -> new SimpleGrantedAuthority("ROLE_" + r))
+                .collect(Collectors.toSet());
     }
 }

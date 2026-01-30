@@ -1,4 +1,4 @@
-package com.backend.apsor.service;
+package com.backend.apsor.service.impls;
 
 import com.backend.apsor.entities.Users;
 import com.backend.apsor.enums.ApiErrorCode;
@@ -6,10 +6,13 @@ import com.backend.apsor.enums.UserStatus;
 import com.backend.apsor.enums.UserType;
 import com.backend.apsor.exceptions.ApiException;
 import com.backend.apsor.payloads.dtos.UserDTO;
-import com.backend.apsor.payloads.requests.AdminUpdateUserReq;
+import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.SignUpReq;
 import com.backend.apsor.payloads.requests.UpdateMeReq;
+import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.repositories.UserRepo;
+import com.backend.apsor.service.UserService;
+import com.backend.apsor.service.VerifyEmailService;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +59,6 @@ public class UserServiceImpl implements UserService {
         return signup(req, UserType.PROVIDER);
     }
 
-    // Admin creation (admin-only endpoint should call this)
-    @Override
-    @Transactional
-    public UserDTO createAdmin(SignUpReq req) {
-        return signup(req, UserType.ADMIN);
-    }
 
     private UserDTO signup(SignUpReq req, UserType type) {
         // Local DB fast checks
@@ -146,7 +143,7 @@ public class UserServiceImpl implements UserService {
             Users saved = usersRepository.save(u);
 
             // 5) Send verify email
-            verifyEmailService.sendVerifyEmailByUserId(keycloakUserId);
+           // verifyEmailService.sendVerifyEmailByUserId(keycloakUserId);
 
             return UserDTO.builder()
                     .id(saved.getId())
@@ -158,7 +155,6 @@ public class UserServiceImpl implements UserService {
                     .firstName(saved.getFirstName())
                     .lastName(saved.getLastName())
                     .phoneNumber(saved.getPhoneNumber())
-                    .profileImageUrl(saved.getProfileImageUrl())
                     .createdAt(saved.getCreatedAt())
                     .updatedAt(saved.getUpdatedAt())
                     .build();
@@ -196,7 +192,6 @@ public class UserServiceImpl implements UserService {
                 .firstName(u.getFirstName())
                 .lastName(u.getLastName())
                 .phoneNumber(u.getPhoneNumber())
-                .profileImageUrl(u.getProfileImageUrl())
                 .createdAt(u.getCreatedAt())
                 .updatedAt(u.getUpdatedAt())
                 .build();
@@ -218,7 +213,6 @@ public class UserServiceImpl implements UserService {
         if (req.getFirstName() != null) u.setFirstName(req.getFirstName());
         if (req.getLastName() != null) u.setLastName(req.getLastName());
         if (req.getPhoneNumber() != null) u.setPhoneNumber(req.getPhoneNumber());
-        if (req.getProfileImageUrl() != null) u.setProfileImageUrl(req.getProfileImageUrl());
 
         if (req.getEmail() != null && !Objects.equals(req.getEmail(), u.getEmail())) {
             if (usersRepository.existsByEmail(req.getEmail())) {
@@ -258,63 +252,200 @@ public class UserServiceImpl implements UserService {
                 .firstName(saved.getFirstName())
                 .lastName(saved.getLastName())
                 .phoneNumber(saved.getPhoneNumber())
-                .profileImageUrl(saved.getProfileImageUrl())
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .build();
     }
 
-    // -------------------------
-    // Admin update (type/status/profile)
-    // -------------------------
     @Override
     @Transactional
-    public UserDTO adminUpdate(Long id, AdminUpdateUserReq req) {
+    public UserDTO createUserByAdmin(CreateUserByAdminReq req) {
+
+        // DB uniqueness checks
+        if (usersRepository.existsByEmail(req.getEmail())) {
+            throw ApiException.conflict(ApiErrorCode.EMAIL_ALREADY_EXISTS,
+                    "Email already exists: %s", req.getEmail());
+        }
+        if (usersRepository.existsByUsername(req.getUsername())) {
+            throw ApiException.conflict(ApiErrorCode.USERNAME_ALREADY_EXISTS,
+                    "Username already exists: %s", req.getUsername());
+        }
+
+        RealmResource realm = keycloakAdmin.realm(REALM);
+
+        // Keycloak uniqueness checks (email at least)
+        if (!realm.users().searchByEmail(req.getEmail(), true).isEmpty()) {
+            throw ApiException.conflict(ApiErrorCode.EMAIL_ALREADY_EXISTS,
+                    "Email already exists in Keycloak: %s", req.getEmail());
+        }
+
+        // Map userType -> realm role name
+        String roleName = switch (req.getUserType()) {
+            case CUSTOMER -> "CUSTOMER";
+            case PROVIDER -> "PROVIDER";
+            case ADMIN -> "ADMIN";
+        };
+
+        // Create user in Keycloak
+        UserRepresentation kcUser = new UserRepresentation();
+        kcUser.setUsername(req.getUsername());
+        kcUser.setEmail(req.getEmail());
+        kcUser.setFirstName(req.getFirstName());
+        kcUser.setLastName(req.getLastName());
+        kcUser.setEmailVerified(false);
+        kcUser.setEnabled(true);
+
+        String keycloakUserId;
+        try (Response resp = realm.users().create(kcUser)) {
+            if (resp.getStatus() != 201) {
+                String body = resp.readEntity(String.class);
+                log.error("Keycloak create user failed status={} body={}", resp.getStatus(), body);
+                throw ApiException.badRequest(ApiErrorCode.KEYCLOAK_CREDENTIAL_ERROR,
+                        "Failed to create user in Keycloak");
+            }
+            keycloakUserId = CreatedResponseUtil.getCreatedId(resp);
+        }
+
+        try {
+            UserResource userResource = realm.users().get(keycloakUserId);
+
+            // OPTIONAL: set temporary password if your request includes it
+            // If you don't want admin to set passwords, remove this block and instead send UPDATE_PASSWORD action email.
+            if (req.getTemporaryPassword() != null && !req.getTemporaryPassword().isBlank()) {
+                CredentialRepresentation pwd = new CredentialRepresentation();
+                pwd.setType(CredentialRepresentation.PASSWORD);
+                pwd.setTemporary(true); // force change on first login (recommended for admin-created users)
+                pwd.setValue(req.getTemporaryPassword());
+                userResource.resetPassword(pwd);
+            } else {
+                // Best practice: require user to set password via email action (Keycloak)
+                // Uncomment if your SMTP + redirect is configured:
+                // userResource.executeActionsEmail(List.of("UPDATE_PASSWORD", "VERIFY_EMAIL"));
+            }
+
+            // Assign realm role
+            RoleRepresentation role = realm.roles().get(roleName).toRepresentation();
+            userResource.roles().realmLevel().add(List.of(role));
+
+            // Save in DB
+            Users u = new Users();
+            u.setKeycloakUserId(keycloakUserId);
+            u.setUsername(req.getUsername());
+            u.setEmail(req.getEmail());
+            u.setFirstName(req.getFirstName());
+            u.setLastName(req.getLastName());
+            u.setPhoneNumber(req.getPhoneNumber());
+            u.setUserType(req.getUserType());
+            u.setStatus(UserStatus.ACTIVE);
+
+            Users saved = usersRepository.save(u);
+
+            return UserDTO.builder()
+                    .id(saved.getId())
+                    .keycloakUserId(saved.getKeycloakUserId())
+                    .userType(saved.getUserType())
+                    .status(saved.getStatus())
+                    .username(saved.getUsername())
+                    .email(saved.getEmail())
+                    .firstName(saved.getFirstName())
+                    .lastName(saved.getLastName())
+                    .phoneNumber(saved.getPhoneNumber())
+                    .createdAt(saved.getCreatedAt())
+                    .updatedAt(saved.getUpdatedAt())
+                    .build();
+
+        } catch (Exception ex) {
+            // Rollback Keycloak user if anything after creation fails
+            try {
+                realm.users().get(keycloakUserId).remove();
+                log.warn("Rolled back Keycloak user {}", keycloakUserId);
+            } catch (Exception rollbackEx) {
+                log.error("Rollback failed for Keycloak user {}", keycloakUserId, rollbackEx);
+            }
+            throw ex;
+        }
+    }
+
+
+    @Override
+    @Transactional
+    public UserDTO updateUserByAdmin(Long id, UpdateUserByAdminReq req) {
+
         Users u = usersRepository.findById(id)
-                .orElseThrow(() -> ApiException.notFound(
-                        ApiErrorCode.USER_NOT_FOUND,
-                        "User not found"));
+                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found"));
 
         UserType oldType = u.getUserType();
-        boolean emailChanged = false;
+        UserStatus oldStatus = u.getStatus();
+        String oldEmail = u.getEmail();
+        String oldUsername = u.getUsername();
 
+        // Unique checks if changed
+        if (req.getEmail() != null && !req.getEmail().equalsIgnoreCase(oldEmail)) {
+            if (usersRepository.existsByEmail(req.getEmail())) {
+                throw ApiException.conflict(ApiErrorCode.EMAIL_ALREADY_EXISTS,
+                        "Email already exists: %s", req.getEmail());
+            }
+        }
+
+        if (req.getUsername() != null && !req.getUsername().equalsIgnoreCase(oldUsername)) {
+            if (usersRepository.existsByUsername(req.getUsername())) {
+                throw ApiException.conflict(ApiErrorCode.USERNAME_ALREADY_EXISTS,
+                        "Username already exists: %s", req.getUsername());
+            }
+        }
+
+        boolean emailChanged = false;
+        boolean typeChanged = false;
+        boolean statusChanged = false;
+
+        // Update DB fields
+        if (req.getUsername() != null && !req.getUsername().isBlank()) u.setUsername(req.getUsername());
+        if (req.getEmail() != null && !req.getEmail().isBlank()) {
+            emailChanged = !req.getEmail().equalsIgnoreCase(oldEmail);
+            u.setEmail(req.getEmail());
+        }
         if (req.getFirstName() != null) u.setFirstName(req.getFirstName());
         if (req.getLastName() != null) u.setLastName(req.getLastName());
         if (req.getPhoneNumber() != null) u.setPhoneNumber(req.getPhoneNumber());
-        if (req.getProfileImageUrl() != null) u.setProfileImageUrl(req.getProfileImageUrl());
 
-        if (req.getEmail() != null && !Objects.equals(req.getEmail(), u.getEmail())) {
-            if (usersRepository.existsByEmail(req.getEmail())) {
-                throw ApiException.conflict(
-                        ApiErrorCode.EMAIL_ALREADY_EXISTS,
-                        "Email already exists",
-                        req.getEmail());
-            }
-            u.setEmail(req.getEmail());
-            emailChanged = true;
+        if (req.getUserType() != null && req.getUserType() != oldType) {
+            typeChanged = true;
+            u.setUserType(req.getUserType());
         }
 
-        if (req.getStatus() != null) u.setStatus(req.getStatus());
-        if (req.getUserType() != null) u.setUserType(req.getUserType());
+        if (req.getStatus() != null && req.getStatus() != oldStatus) {
+            statusChanged = true;
+            u.setStatus(req.getStatus());
+        }
 
         Users saved = usersRepository.save(u);
 
+        // Sync Keycloak
         RealmResource realm = keycloakAdmin.realm(REALM);
-        UserResource ur = realm.users().get(saved.getKeycloakUserId());
-        UserRepresentation rep = ur.toRepresentation();
+        UserResource userResource = realm.users().get(saved.getKeycloakUserId());
+        UserRepresentation rep = userResource.toRepresentation();
 
-        // Sync profile
-        rep.setFirstName(saved.getFirstName());
-        rep.setLastName(saved.getLastName());
-        rep.setEmail(saved.getEmail());
-        if (emailChanged) rep.setEmailVerified(false);
+        if (req.getUsername() != null) rep.setUsername(saved.getUsername());
+        if (req.getEmail() != null) rep.setEmail(saved.getEmail());
+        if (req.getFirstName() != null) rep.setFirstName(saved.getFirstName());
+        if (req.getLastName() != null) rep.setLastName(saved.getLastName());
 
-        // Disable login if not ACTIVE
-        rep.setEnabled(saved.getStatus() == UserStatus.ACTIVE);
-        ur.update(rep);
+        // If email changed, force re-verify
+        if (emailChanged) {
+            rep.setEmailVerified(false);
+            // optionally send verify email if configured:
+            // verifyEmailService.sendVerifyEmailByUserId(saved.getKeycloakUserId());
+        }
 
-        // Sync role if type changed
-        if (req.getUserType() != null && req.getUserType() != oldType) {
+        // Enable/disable based on status (only ACTIVE enabled)
+        if (statusChanged) {
+            rep.setEnabled(saved.getStatus() == UserStatus.ACTIVE);
+        }
+
+        userResource.update(rep);
+
+        // Sync roles if type changed
+        if (typeChanged) {
             String oldRole = switch (oldType) {
                 case CUSTOMER -> "CUSTOMER";
                 case PROVIDER -> "PROVIDER";
@@ -328,12 +459,9 @@ public class UserServiceImpl implements UserService {
 
             RoleRepresentation oldR = realm.roles().get(oldRole).toRepresentation();
             RoleRepresentation newR = realm.roles().get(newRole).toRepresentation();
-            ur.roles().realmLevel().remove(List.of(oldR));
-            ur.roles().realmLevel().add(List.of(newR));
-        }
 
-        if (emailChanged) {
-            verifyEmailService.sendVerifyEmailByUserId(saved.getKeycloakUserId());
+            userResource.roles().realmLevel().remove(List.of(oldR));
+            userResource.roles().realmLevel().add(List.of(newR));
         }
 
         return UserDTO.builder()
@@ -346,11 +474,11 @@ public class UserServiceImpl implements UserService {
                 .firstName(saved.getFirstName())
                 .lastName(saved.getLastName())
                 .phoneNumber(saved.getPhoneNumber())
-                .profileImageUrl(saved.getProfileImageUrl())
                 .createdAt(saved.getCreatedAt())
                 .updatedAt(saved.getUpdatedAt())
                 .build();
     }
+
 
     // -------------------------
     // Delete (soft delete + disable Keycloak)
@@ -376,4 +504,5 @@ public class UserServiceImpl implements UserService {
         rep.setEnabled(false);
         ur.update(rep);
     }
+
 }

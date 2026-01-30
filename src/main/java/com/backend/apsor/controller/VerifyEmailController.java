@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/v1/verify-email")
 @RequiredArgsConstructor
 public class VerifyEmailController {
 
     private final VerifyEmailService verifyEmailService;
 
-    @PostMapping("/verify-email/resend")
+    @PostMapping("/resend")
     public ResponseEntity<Void> resend(@AuthenticationPrincipal Jwt jwt) {
         verifyEmailService.resendForCurrentUser(jwt);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/verify-email/status")
+    @GetMapping("/status")
     public ResponseEntity<VerifyEmailStatusRes> status(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(new VerifyEmailStatusRes(verifyEmailService.isEmailVerified(jwt)));
     }

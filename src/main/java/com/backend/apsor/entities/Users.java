@@ -44,9 +44,6 @@ public class Users {
     @Column(length = 30)
     private String phoneNumber;
 
-    @Column(length = 500,nullable = true)
-    private String profileImageUrl;
-
     // Activity
     @Column(nullable = true)
     private Instant lastLoginAt;

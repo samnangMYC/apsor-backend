@@ -1,33 +1,36 @@
 package com.backend.apsor.controller;
 
 import com.backend.apsor.payloads.dtos.UserDTO;
-import com.backend.apsor.payloads.requests.AdminUpdateUserReq;
+import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.SignUpReq;
+import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
-@RequestMapping("/api/v1/admin")
+@RequestMapping("/api/v1/admin/user")
+//@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     private final UserService userService;
 
     // -----------------------
     // Admin (manage users)
-    // -----------------------
-    @PostMapping("/signup")
-    public ResponseEntity<UserDTO> createAdmin(@Valid @RequestBody SignUpReq req) {
-        return ResponseEntity.status(201).body(userService.createAdmin(req));
+    @PostMapping
+    public ResponseEntity<UserDTO> create(@Valid @RequestBody CreateUserByAdminReq req) {
+        log.info("Received request to create user by admin");
+        return ResponseEntity.status(201).body(userService.createUserByAdmin(req));
     }
-    @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> adminUpdate(@PathVariable Long id,
-                                               @Valid @RequestBody AdminUpdateUserReq req) {
-        return ResponseEntity.ok(userService.adminUpdate(id, req));
+    @PutMapping("/{id}")
+    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UpdateUserByAdminReq req) {
+        return ResponseEntity.ok(userService.updateUserByAdmin(id, req));
     }
 
     @DeleteMapping("/{id}")
@@ -35,4 +38,10 @@ public class AdminController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/debug/authorities")
+    public Object authorities(Authentication auth) {
+        return auth.getAuthorities();
+    }
+
 }
