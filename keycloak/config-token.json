@@ -1,0 +1,7 @@
+{
+  "realm": "apsor-app",
+  "enabled": true,
+  "accessTokenLifespan": 600,
+  "ssoSessionIdleTimeout": 604800,
+  "ssoSessionMaxLifespan": 2592000
+}

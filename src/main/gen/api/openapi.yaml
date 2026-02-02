@@ -1,0 +1,156 @@
+openapi: 3.0.3
+info:
+  description: "API for user authentication (signup, signin, refresh JWT)"
+  title: Auth API
+  version: 1.0.0
+servers:
+- description: Local server
+  url: http://localhost:8080
+paths:
+  /api/v1/auth/signup:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+        description: Signup payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+          description: Successfully registered
+        "400":
+          description: Bad request
+      summary: Register a new user
+      tags:
+      - Authentication
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/auth/signin:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
+        description: Signin payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SigninResponse'
+          description: JWT returned
+        "401":
+          description: Unauthorized
+      summary: Authenticate user and return JWT
+      tags:
+      - Authentication
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+  /api/v1/auth/refresh:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+        description: Refresh token payload
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+          description: New JWT returned
+        "401":
+          description: Invalid refresh token
+      summary: Refresh JWT token
+      tags:
+      - Authentication
+      x-content-type: application/json
+      x-accepts:
+      - application/json
+components:
+  schemas:
+    SignupRequest:
+      example:
+        password: password
+        email: email
+        username: username
+      properties:
+        username:
+          type: string
+        email:
+          format: email
+          type: string
+        password:
+          format: password
+          type: string
+      required:
+      - email
+      - password
+      - username
+      type: object
+    SignupResponse:
+      example:
+        message: message
+      properties:
+        message:
+          type: string
+      type: object
+    SigninRequest:
+      example:
+        password: password
+        email: email
+      properties:
+        email:
+          format: email
+          type: string
+        password:
+          format: password
+          type: string
+      required:
+      - email
+      - password
+      type: object
+    SigninResponse:
+      example:
+        accessToken: accessToken
+        tokenType: Bearer
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          example: Bearer
+          type: string
+      type: object
+    RefreshRequest:
+      example:
+        refreshToken: refreshToken
+      properties:
+        refreshToken:
+          type: string
+      required:
+      - refreshToken
+      type: object
+    RefreshResponse:
+      example:
+        accessToken: accessToken
+        tokenType: Bearer
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          example: Bearer
+          type: string
+      type: object
+

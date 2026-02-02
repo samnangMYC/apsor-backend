@@ -1,0 +1,140 @@
+openapi: 3.0.3
+info:
+  title: Auth API
+  version: 1.0.0
+  description: API for user authentication (signup, signin, refresh JWT)
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+paths:
+  /api/v1/auth/signup:
+    post:
+      summary: Register a new user
+      tags:
+        - Authentication
+      requestBody:
+        description: Signup payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SignupRequest'
+      responses:
+        '200':
+          description: Successfully registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SignupResponse'
+        '400':
+          description: Bad request
+
+  /api/v1/auth/signin:
+    post:
+      summary: Authenticate user and return JWT
+      tags:
+        - Authentication
+      requestBody:
+        description: Signin payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SigninRequest'
+      responses:
+        '200':
+          description: JWT returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SigninResponse'
+        '401':
+          description: Unauthorized
+
+  /api/v1/auth/refresh:
+    post:
+      summary: Refresh JWT token
+      tags:
+        - Authentication
+      requestBody:
+        description: Refresh token payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshRequest'
+      responses:
+        '200':
+          description: New JWT returned
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RefreshResponse'
+        '401':
+          description: Invalid refresh token
+
+components:
+  schemas:
+    SignupRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - username
+        - email
+        - password
+
+    SignupResponse:
+      type: object
+      properties:
+        message:
+          type: string
+
+    SigninRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+      required:
+        - email
+        - password
+
+    SigninResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+
+    RefreshRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+      required:
+        - refreshToken
+
+    RefreshResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          example: Bearer
+
