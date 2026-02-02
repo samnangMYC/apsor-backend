@@ -19,22 +19,22 @@ public class UserDTO {
     private String keycloakUserId;
 
     private String username;
+
     private String email;
+
     private String firstName;
+
     private String lastName;
 
     private UserType userType;
+
     private UserStatus status;
 
     private String phoneNumber;
 
-    private String profileImageUrl;
-
     private Instant lastLoginAt;
 
     private Instant lastSeenAt;
-
-    private boolean online;
 
     private Instant createdAt;
 

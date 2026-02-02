@@ -1,4 +1,4 @@
-package com.backend.apsor.service;
+package com.backend.apsor.service.auth;
 
 import lombok.RequiredArgsConstructor;
 import org.keycloak.admin.client.Keycloak;

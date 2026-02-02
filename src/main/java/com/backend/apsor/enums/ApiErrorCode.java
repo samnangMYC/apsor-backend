@@ -12,7 +12,10 @@ public enum ApiErrorCode {
     ACCESS_DENIED("AUTH_003"),
 
     // keycloak
-    KEYCLOAK_CREDENTIAL_ERROR("AUTH_005"),
+    KEYCLOAK_ID_MISSING("AUTH_004"),
+    KEYCLOAK_USER_NOT_FOUND("AUTH_005"),
+    KEYCLOAK_CREDENTIAL_ERROR("AUTH_006"),
+
 
     // User
     EMAIL_ALREADY_EXISTS("USER_001"),
@@ -24,6 +27,9 @@ public enum ApiErrorCode {
     // Validation / request
     VALIDATION_ERROR("REQ_001"),
     BAD_REQUEST("REQ_002"),
+
+    CATEGORY_NAME_EXISTS("CAT_001"),
+    CATEGORY_NOT_FOUND("CAT_002"),
 
     // System
     INTERNAL_ERROR("SYS_001");

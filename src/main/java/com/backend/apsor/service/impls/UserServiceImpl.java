@@ -5,14 +5,16 @@ import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.UserStatus;
 import com.backend.apsor.enums.UserType;
 import com.backend.apsor.exceptions.ApiException;
+import com.backend.apsor.mapper.UserMapper;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.SignUpReq;
 import com.backend.apsor.payloads.requests.UpdateMeReq;
 import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.repositories.UserRepo;
+import com.backend.apsor.service.auth.KeycloakAdminClient;
 import com.backend.apsor.service.UserService;
-import com.backend.apsor.service.VerifyEmailService;
+import com.backend.apsor.service.auth.VerifyEmailService;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,8 @@ public class UserServiceImpl implements UserService {
     private final Keycloak keycloakAdmin;
     private final UserRepo usersRepository;
     private final VerifyEmailService verifyEmailService;
+    private final KeycloakAdminClient keycloakAdminClient;
+    private final UserMapper userMapper;
 
     @Value("${keycloak.realm}")
     private String REALM;
@@ -479,30 +483,82 @@ public class UserServiceImpl implements UserService {
                 .build();
     }
 
-
     // -------------------------
     // Delete (soft delete + disable Keycloak)
     // -------------------------
     @Override
-    @Transactional
-    public void deleteUser(Long id) {
-        Users u = usersRepository.findById(id)
-                .orElseThrow(() -> ApiException.notFound(
-                        ApiErrorCode.USER_NOT_FOUND,
-                        "User not found"
-                ));
+    public String softDeleteUserByAdmin(Long id) {
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found: " + id));
 
-        if (u.getDeletedAt() != null) return;
+        // already soft deleted -> idempotent
+        if (user.getDeletedAt() != null) {
+            return "User already soft-deleted";
+        }
 
-        u.setStatus(UserStatus.DELETED);
-        u.setDeletedAt(Instant.now());
-        usersRepository.save(u);
+        String keycloakUserId = user.getKeycloakUserId();
+        if (keycloakUserId == null || keycloakUserId.isBlank()) {
+            throw ApiException.badRequest(ApiErrorCode.KEYCLOAK_ID_MISSING, "User has no keycloakUserId: " + id);
+        }
 
-        RealmResource realm = keycloakAdmin.realm(REALM);
-        UserResource ur = realm.users().get(u.getKeycloakUserId());
-        UserRepresentation rep = ur.toRepresentation();
-        rep.setEnabled(false);
-        ur.update(rep);
+        // 1) Disable in Keycloak (prevents login, keeps audit)
+        try {
+            keycloakAdminClient.disableUser(keycloakUserId);
+        } catch (Exception ex) {
+            // If Keycloak user is missing, you can choose:
+            // - treat as not found (strict)
+            // - or ignore and still soft delete locally (lenient)
+            throw ApiException.notFound(ApiErrorCode.KEYCLOAK_USER_NOT_FOUND, "Keycloak user not found: " + keycloakUserId);
+        }
+
+        // 2) Soft delete locally
+        user.setDeletedAt(Instant.now());
+        user.setStatus(UserStatus.DELETED);
+        usersRepository.save(user);
+
+        log.info("Soft deleted user. localId={}, keycloakUserId={}", id, keycloakUserId);
+        return "User soft deleted successfully";
+    }
+
+    @Override
+    public String hardDeleteUserByAdmin(Long id) {
+        Users user = usersRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found: " + id));
+
+        String keycloakUserId = user.getKeycloakUserId();
+        if (keycloakUserId == null || keycloakUserId.isBlank()) {
+            throw ApiException.badRequest(ApiErrorCode.KEYCLOAK_ID_MISSING, "User has no keycloakUserId: " + id);
+        }
+
+        // 1) Delete from Keycloak permanently (best-effort or strict)
+        try {
+            keycloakAdminClient.deleteUser(keycloakUserId);
+        } catch (Exception ex) {
+            // recommended: idempotent hard delete:
+            // if Keycloak user already deleted -> continue
+            log.warn("Keycloak hard delete failed/ignored. keycloakUserId={}, reason={}", keycloakUserId, ex.getMessage());
+        }
+
+        // 2) Hard delete locally
+        usersRepository.delete(user);
+
+        log.info("Hard deleted user. localId={}, keycloakUserId={}", id, keycloakUserId);
+        return "User hard deleted successfully";
+        }
+
+    @Override
+    public UserDTO getUserByIdFromAdmin(Long id) {
+        Users users = usersRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found: " + id));
+
+        return userMapper.toDTO(users);
+    }
+
+    @Override
+    public List<UserDTO> getAllUserFromAdmin() {
+        return usersRepository.findAll()
+                .stream()
+                .map(userMapper::toDTO).toList();
     }
 
 }

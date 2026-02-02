@@ -13,6 +13,13 @@ spring:
     properties:
       hibernate:
         format_sql: true
+  server:
+    error:
+      include-message: always
+      include-binding-errors: always
+      include-stacktrace: never
+      whitelabel:
+        enabled: false
 
   security:
     oauth2:
@@ -52,3 +59,12 @@ logging:
     org.springframework.security.oauth2: DEBUG
     org.springframework.security.oauth2.server.resource: DEBUG
     org.springframework.web: DEBUG
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    tryItOutEnabled: true
+    persistAuthorization: true
+  api-docs:
+    path: /v3/api-docs
+
