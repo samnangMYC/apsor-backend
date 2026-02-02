@@ -23,6 +23,7 @@ jobs:
         uses: actions/upload-pages-artifact@v1
         with:
           path: swagger   # folder containing index.html + static Swagger UI files
+          artifact-name: swagger-docs
 
       # 4️⃣ Deploy Pages
       - name: Deploy to GitHub Pages
