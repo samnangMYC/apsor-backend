@@ -39,11 +39,7 @@ public class AdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "User created successfully",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+                            schema = @Schema(implementation = UserDTO.class)) })
     })
     @PostMapping
     public ResponseEntity<UserDTO> create(@Valid @RequestBody CreateUserByAdminReq req) {
@@ -57,10 +53,6 @@ public class AdminController {
             @ApiResponse(responseCode = "200", description = "User found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserByIdFromAdmin(@PathVariable Long id) {
@@ -75,10 +67,8 @@ public class AdminController {
             @ApiResponse(responseCode = "200", description = "List of users retrieved",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
+
     @GetMapping
     public ResponseEntity<List<UserDTO>> getAllUserFromAdmin(){
         log.info("Received request to get all users");
@@ -90,14 +80,9 @@ public class AdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User updated successfully",
                     content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+                            schema = @Schema(implementation = UserDTO.class)) })
     })
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UpdateUserByAdminReq req) {
         return ResponseEntity.ok(userService.updateUserByAdmin(id, req));
     }
@@ -108,10 +93,6 @@ public class AdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User soft deleted successfully",
                     content = { @Content(mediaType = "text/plain") }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> softDelete(@PathVariable Long id) {
@@ -124,23 +105,13 @@ public class AdminController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User hard deleted successfully",
                     content = { @Content(mediaType = "text/plain") }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden - Admin access required"),
-            @ApiResponse(responseCode = "404", description = "User not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}/hard")
     public ResponseEntity<String> hardDelete(@PathVariable Long id) {
         return ResponseEntity.ok(userService.hardDeleteUserByAdmin(id));
     }
-
     @Operation(summary = "Debug user authorities",
             description = "Returns the authorities of the authenticated user for debugging purposes.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Authorities retrieved"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
     @GetMapping("/debug/authorities")
     public Object authorities(Authentication auth) {
         return auth.getAuthorities();

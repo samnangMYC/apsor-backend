@@ -28,6 +28,7 @@ public class Users {
 
     // Cached profile
     private String username;
+
     private String email;
 
     private String firstName;
@@ -58,5 +59,11 @@ public class Users {
 
     @Column(nullable = true)
     private Instant deletedAt;
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    private Provider provider;
+
+    @OneToOne(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
+    private Customer customer;
 
 }

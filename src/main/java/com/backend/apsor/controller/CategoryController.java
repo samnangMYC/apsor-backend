@@ -74,10 +74,6 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "Category found",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{catId}")
     public ResponseEntity<CategoryDTO> findById(
@@ -94,11 +90,6 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "Category updated successfully",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{catId}")
     public ResponseEntity<CategoryDTO> update(
@@ -117,11 +108,6 @@ public class CategoryController {
             @ApiResponse(responseCode = "200", description = "Category status updated successfully",
                     content = { @Content(mediaType = "application/json",
                             schema = @Schema(implementation = CategoryDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PatchMapping("/{catId}/status")
     public ResponseEntity<CategoryDTO> updateStatus(
@@ -139,10 +125,6 @@ public class CategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Category soft deleted successfully",
                     content = { @Content(mediaType = "text/plain") }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{catId}")
     public ResponseEntity<String> softDelete(
@@ -157,10 +139,6 @@ public class CategoryController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Category hard deleted successfully",
                     content = { @Content(mediaType = "text/plain") }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "403", description = "Forbidden"),
-            @ApiResponse(responseCode = "404", description = "Category not found"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{catId}/hard")
     public ResponseEntity<String> hardDelete(

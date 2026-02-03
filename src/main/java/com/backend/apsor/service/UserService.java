@@ -1,5 +1,6 @@
 package com.backend.apsor.service;
 
+import com.backend.apsor.entities.Users;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.SignUpReq;
@@ -32,5 +33,6 @@ public interface UserService {
 
     List<UserDTO> getAllUserFromAdmin();
 
+    Users loadUserByJwt(Jwt jwt);
 
 }

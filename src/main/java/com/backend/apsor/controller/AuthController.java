@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "Authentication", description = "SignUp/SignIn/Refresh/SignOut using HttpOnly cookies")
+@Tag(name = "Authentication", description = "Endpoints for accept user process login,register,logout and return cookies")
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")

@@ -5,6 +5,7 @@ import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.UserStatus;
 import com.backend.apsor.enums.UserType;
 import com.backend.apsor.exceptions.ApiException;
+import com.backend.apsor.exceptions.KeycloakException;
 import com.backend.apsor.mapper.UserMapper;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
@@ -12,9 +13,10 @@ import com.backend.apsor.payloads.requests.SignUpReq;
 import com.backend.apsor.payloads.requests.UpdateMeReq;
 import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.repositories.UserRepo;
-import com.backend.apsor.service.auth.KeycloakAdminClient;
 import com.backend.apsor.service.UserService;
+import com.backend.apsor.service.auth.KeycloakAdminClient;
 import com.backend.apsor.service.auth.VerifyEmailService;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final VerifyEmailService verifyEmailService;
     private final KeycloakAdminClient keycloakAdminClient;
     private final UserMapper userMapper;
+    private final KeycloakException keycloakError;
 
     @Value("${keycloak.realm}")
     private String REALM;
@@ -262,6 +265,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserDTO getUserByIdFromAdmin(Long id) {
+        Users users = usersRepository.findById(id)
+                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found: " + id));
+
+        return userMapper.toDTO(users);
+    }
+
+    @Override
+    public List<UserDTO> getAllUserFromAdmin() {
+        return usersRepository.findAll()
+                .stream()
+                .map(userMapper::toDTO).toList();
+    }
+
+    @Override
     @Transactional
     public UserDTO createUserByAdmin(CreateUserByAdminReq req) {
 
@@ -370,7 +388,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
     @Transactional
     public UserDTO updateUserByAdmin(Long id, UpdateUserByAdminReq req) {
@@ -378,94 +395,106 @@ public class UserServiceImpl implements UserService {
         Users u = usersRepository.findById(id)
                 .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found"));
 
+        // ---- basic safety
+        String kcId = u.getKeycloakUserId();
+        if (kcId == null || kcId.isBlank()) {
+            throw ApiException.badRequest(ApiErrorCode.KEYCLOAK_ID_MISSING,
+                    "User has no keycloakUserId (userId=%s)", id);
+        }
+
         UserType oldType = u.getUserType();
         UserStatus oldStatus = u.getStatus();
         String oldEmail = u.getEmail();
         String oldUsername = u.getUsername();
 
-        // Unique checks if changed
-        if (req.getEmail() != null && !req.getEmail().equalsIgnoreCase(oldEmail)) {
-            if (usersRepository.existsByEmail(req.getEmail())) {
+        // normalize
+        String newUsername = req.getUsername() != null ? req.getUsername().trim() : null;
+        String newEmail = req.getEmail() != null ? req.getEmail().trim() : null;
+
+        // ---- Unique checks (DB)
+        boolean email = newEmail != null && !newEmail.isBlank() && (!newEmail.equalsIgnoreCase(oldEmail));
+        if (email) {
+            if (usersRepository.existsByEmail(newEmail)) {
                 throw ApiException.conflict(ApiErrorCode.EMAIL_ALREADY_EXISTS,
-                        "Email already exists: %s", req.getEmail());
+                        "Email already exists: %s", newEmail);
             }
         }
 
-        if (req.getUsername() != null && !req.getUsername().equalsIgnoreCase(oldUsername)) {
-            if (usersRepository.existsByUsername(req.getUsername())) {
+        if (newUsername != null && !newUsername.isBlank() && (!newUsername.equalsIgnoreCase(oldUsername))) {
+            if (usersRepository.existsByUsername(newUsername)) {
                 throw ApiException.conflict(ApiErrorCode.USERNAME_ALREADY_EXISTS,
-                        "Username already exists: %s", req.getUsername());
+                        "Username already exists: %s", newUsername);
             }
         }
 
-        boolean emailChanged = false;
-        boolean typeChanged = false;
-        boolean statusChanged = false;
+        boolean typeChanged = req.getUserType() != null && req.getUserType() != oldType;
+        boolean statusChanged = req.getStatus() != null && req.getStatus() != oldStatus;
 
-        // Update DB fields
-        if (req.getUsername() != null && !req.getUsername().isBlank()) u.setUsername(req.getUsername());
-        if (req.getEmail() != null && !req.getEmail().isBlank()) {
-            emailChanged = !req.getEmail().equalsIgnoreCase(oldEmail);
-            u.setEmail(req.getEmail());
-        }
-        if (req.getFirstName() != null) u.setFirstName(req.getFirstName());
-        if (req.getLastName() != null) u.setLastName(req.getLastName());
-        if (req.getPhoneNumber() != null) u.setPhoneNumber(req.getPhoneNumber());
+        // ---- Update DB (only if provided)
+        if (newUsername != null && !newUsername.isBlank()) u.setUsername(newUsername);
+        if (newEmail != null && !newEmail.isBlank()) u.setEmail(newEmail);
 
-        if (req.getUserType() != null && req.getUserType() != oldType) {
-            typeChanged = true;
-            u.setUserType(req.getUserType());
-        }
+        if (req.getFirstName() != null) u.setFirstName(req.getFirstName().trim());
+        if (req.getLastName() != null) u.setLastName(req.getLastName().trim());
+        if (req.getPhoneNumber() != null) u.setPhoneNumber(req.getPhoneNumber().trim());
 
-        if (req.getStatus() != null && req.getStatus() != oldStatus) {
-            statusChanged = true;
-            u.setStatus(req.getStatus());
-        }
+        if (typeChanged) u.setUserType(req.getUserType());
+        if (statusChanged) u.setStatus(req.getStatus());
 
         Users saved = usersRepository.save(u);
 
-        // Sync Keycloak
+        // ---- Sync Keycloak
         RealmResource realm = keycloakAdmin.realm(REALM);
-        UserResource userResource = realm.users().get(saved.getKeycloakUserId());
+        UserResource userResource = realm.users().get(kcId);
+
+        // Start from current rep (safer than creating new)
         UserRepresentation rep = userResource.toRepresentation();
 
-        if (req.getUsername() != null) rep.setUsername(saved.getUsername());
-        if (req.getEmail() != null) rep.setEmail(saved.getEmail());
+        // IMPORTANT: only set fields when request gives non-blank values
+        if (newUsername != null && !newUsername.isBlank()) rep.setUsername(saved.getUsername());
+        if (newEmail != null && !newEmail.isBlank()) rep.setEmail(saved.getEmail());
         if (req.getFirstName() != null) rep.setFirstName(saved.getFirstName());
         if (req.getLastName() != null) rep.setLastName(saved.getLastName());
 
-        // If email changed, force re-verify
-        if (emailChanged) {
-            rep.setEmailVerified(false);
-            // optionally send verify email if configured:
-            // verifyEmailService.sendVerifyEmailByUserId(saved.getKeycloakUserId());
+        if (email) rep.setEmailVerified(false);
+
+        if (statusChanged) rep.setEnabled(saved.getStatus() == UserStatus.ACTIVE);
+
+        // Keycloak update with readable error body
+        try {
+            userResource.update(rep);
+        } catch (WebApplicationException ex) {
+            throw keycloakError.toApiException(ex, "Keycloak rejected user update (kcId=" + kcId + ")");
         }
 
-        // Enable/disable based on status (only ACTIVE enabled)
-        if (statusChanged) {
-            rep.setEnabled(saved.getStatus() == UserStatus.ACTIVE);
+        // ---- Update password (Keycloak) if provided
+        if (req.getPassword() != null && !req.getPassword().isBlank()) {
+            CredentialRepresentation cred = new CredentialRepresentation();
+            cred.setType(CredentialRepresentation.PASSWORD);
+            cred.setValue(req.getPassword());
+            cred.setTemporary(false);
+
+            try {
+                userResource.resetPassword(cred);
+            } catch (WebApplicationException ex) {
+                throw keycloakError.toApiException(ex, "Keycloak rejected password reset (kcId=" + kcId + ")");
+            }
         }
 
-        userResource.update(rep);
-
-        // Sync roles if type changed
+        // ---- Sync roles if type changed
         if (typeChanged) {
-            String oldRole = switch (oldType) {
-                case CUSTOMER -> "CUSTOMER";
-                case PROVIDER -> "PROVIDER";
-                case ADMIN -> "ADMIN";
-            };
-            String newRole = switch (saved.getUserType()) {
-                case CUSTOMER -> "CUSTOMER";
-                case PROVIDER -> "PROVIDER";
-                case ADMIN -> "ADMIN";
-            };
+            String oldRole = oldType.name();
+            String newRole = saved.getUserType().name();
 
             RoleRepresentation oldR = realm.roles().get(oldRole).toRepresentation();
             RoleRepresentation newR = realm.roles().get(newRole).toRepresentation();
 
-            userResource.roles().realmLevel().remove(List.of(oldR));
-            userResource.roles().realmLevel().add(List.of(newR));
+            try {
+                userResource.roles().realmLevel().remove(List.of(oldR));
+                userResource.roles().realmLevel().add(List.of(newR));
+            } catch (WebApplicationException ex) {
+                throw keycloakError.toApiException(ex, "Keycloak rejected role update (kcId=" + kcId + ")");
+            }
         }
 
         return UserDTO.builder()
@@ -546,19 +575,18 @@ public class UserServiceImpl implements UserService {
         return "User hard deleted successfully";
         }
 
-    @Override
-    public UserDTO getUserByIdFromAdmin(Long id) {
-        Users users = usersRepository.findById(id)
-                .orElseThrow(() -> ApiException.notFound(ApiErrorCode.USER_NOT_FOUND, "User not found: " + id));
 
-        return userMapper.toDTO(users);
-    }
+        @Override
+        public Users loadUserByJwt(Jwt jwt) {
+        String kcUserId = jwt.getSubject();
 
-    @Override
-    public List<UserDTO> getAllUserFromAdmin() {
-        return usersRepository.findAll()
-                .stream()
-                .map(userMapper::toDTO).toList();
+        return usersRepository.findByKeycloakUserId(kcUserId)
+                .orElseThrow(() -> ApiException.notFound(
+                        ApiErrorCode.USER_NOT_FOUND,
+                        "User not found with id: ",
+                        kcUserId
+                ));
+
     }
 
 }
