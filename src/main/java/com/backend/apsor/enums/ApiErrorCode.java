@@ -32,6 +32,9 @@ public enum ApiErrorCode {
     CUSTOMER_NOT_FOUND("CUS_001"),
     CUSTOMER_ALREADY_EXISTS("CUS_002"),
 
+    // User Location
+    LOCATION_NOT_FOUND("LOC_001"),
+    LOCATION_ALREADY_EXISTS("LOC_002"),
 
     // Validation / request
     VALIDATION_ERROR("REQ_001"),
@@ -39,6 +42,9 @@ public enum ApiErrorCode {
 
     CATEGORY_NAME_EXISTS("CAT_001"),
     CATEGORY_NOT_FOUND("CAT_002"),
+
+    SUBCATEGORY_NAME_EXISTS("SUB_CAT_001"),
+    SUBCATEGORY_NOT_FOUND("SUB_CAT_002"),
 
     // System
     INTERNAL_ERROR("SYS_001");

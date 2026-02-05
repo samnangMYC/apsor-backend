@@ -14,6 +14,7 @@ public interface UserMapper {
 
     @Mapping(target = "provider", ignore = true)
     @Mapping(target = "customer", ignore = true)
+    @Mapping(target = "locations", ignore = true)
     Users toEntity(UserDTO userDTO);
 
     List<UserDTO> toListDTO(List<Users> usersList);

@@ -86,20 +86,6 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toDto(updatedCategory);
     }
 
-    @Override
-    public String softDeleteById(Long id) {
-        return categoryRepository.findById(id)
-                .map(category -> {
-                    category.setStatus(Status.DELETED);
-                    category.setDeletedAt(Instant.now());
-                    categoryRepository.save(category);
-                    return "Category with id " + id + " has been deleted";
-                }).orElseThrow(() -> ApiException.notFound(
-                        ApiErrorCode.CATEGORY_NOT_FOUND,
-                        "Category with id " + id + " not found.",
-                        id.toString()
-                ));
-    }
 
     @Override
     public CategoryDTO updateStatusById(Long id, CategoryStatusReq req) {
@@ -110,6 +96,20 @@ public class CategoryServiceImpl implements CategoryService {
                     return categoryMapper.toDto(category);
                 })
                 .orElseThrow(() -> ApiException.notFound(
+                        ApiErrorCode.CATEGORY_NOT_FOUND,
+                        "Category with id " + id + " not found.",
+                        id.toString()
+                ));
+    }
+    @Override
+    public String softDeleteById(Long id) {
+        return categoryRepository.findById(id)
+                .map(category -> {
+                    category.setStatus(Status.DELETED);
+                    category.setDeletedAt(Instant.now());
+                    categoryRepository.save(category);
+                    return "Category with id " + id + " has been deleted";
+                }).orElseThrow(() -> ApiException.notFound(
                         ApiErrorCode.CATEGORY_NOT_FOUND,
                         "Category with id " + id + " not found.",
                         id.toString()

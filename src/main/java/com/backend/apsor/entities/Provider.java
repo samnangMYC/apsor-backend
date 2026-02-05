@@ -3,6 +3,7 @@ package com.backend.apsor.entities;
 import com.backend.apsor.enums.BusinessType;
 import com.backend.apsor.enums.VerificationStatus;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -13,6 +14,7 @@ import java.time.Instant;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class Provider {
 

@@ -11,6 +11,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor
@@ -65,5 +67,9 @@ public class Users {
 
     @OneToOne(mappedBy = "user",cascade = CascadeType.ALL,orphanRemoval = true)
     private Customer customer;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserLocation> locations = new ArrayList<>();
+
 
 }
