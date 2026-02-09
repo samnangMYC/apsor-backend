@@ -67,6 +67,19 @@ public class CustomerServiceImpl implements CustomerService {
                 ));
     }
 
+    @Override
+    public CustomerDTO updateCustomerByJwt(Jwt jwt, CustomerReq req) {
+        Users user = userServiceImpl.loadUserByJwt(jwt);
+        return customerRepo.findById(user.getId())
+                .map(customer -> {
+                    customerMapper.updateEntity(req,customer);
+                    return customerMapper.toDto(customerRepo.save(customer));
+                }).orElseThrow(() -> ApiException.notFound(
+                        ApiErrorCode.CATEGORY_NOT_FOUND,
+                        "Customer with id " + user.getId() + " not found."
+                ));
+    }
+
 
     @Override
     public CustomerDTO updateCustomerById(Long id, CustomerReq req) {

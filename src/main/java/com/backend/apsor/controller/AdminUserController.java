@@ -2,7 +2,6 @@ package com.backend.apsor.controller;
 
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
-import com.backend.apsor.payloads.requests.SignUpReq;
 import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -15,10 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,9 +22,9 @@ import java.util.List;
 @Tag(name = "Manage Users By Admin", description = "Endpoints for administrators to manage users, including creation, retrieval, update, and deletion operations.")
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/admin/user")
+@RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
-public class AdminController {
+public class AdminUserController {
     private final UserService userService;
 
     // -----------------------

@@ -19,4 +19,6 @@ public interface CustomerService {
     String deleteCustomerById(Long id);
 
     CustomerDTO getCustomerByJwt(Jwt jwt);
+
+    CustomerDTO updateCustomerByJwt(Jwt jwt, @Valid CustomerReq req);
 }

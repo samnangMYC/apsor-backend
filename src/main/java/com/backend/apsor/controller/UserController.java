@@ -29,13 +29,6 @@ public class UserController {
     // -----------------------
     @Operation(summary = "Get current user's details",
             description = "Retrieves the details of the currently authenticated user.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User details retrieved successfully",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
     @GetMapping("/me")
     public ResponseEntity<UserDTO> me(@AuthenticationPrincipal Jwt jwt) {
         return ResponseEntity.ok(userService.getMe(jwt));
@@ -43,14 +36,6 @@ public class UserController {
 
     @Operation(summary = "Update current user's details",
             description = "Partially updates the details of the currently authenticated user.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User details updated successfully",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-            @ApiResponse(responseCode = "400", description = "Invalid request data"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized - Authentication required"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
     @PatchMapping("/me")
     public ResponseEntity<UserDTO> updateMe(@AuthenticationPrincipal Jwt jwt,
                                             @Valid @RequestBody UpdateMeReq req) {

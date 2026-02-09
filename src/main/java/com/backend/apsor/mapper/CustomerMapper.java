@@ -17,6 +17,8 @@ public interface CustomerMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "onboardingCompleted", ignore = true)
     Customer toEntity(CustomerReq customerReq);
 
     @Mapping(target = "userId", source = "id")
@@ -27,6 +29,8 @@ public interface CustomerMapper {
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "onboardingCompleted", ignore = true)
     void updateEntity(CustomerReq customerReq, @MappingTarget Customer customer);
 
     List<CustomerDTO> toListDto(List<Customer> customers);

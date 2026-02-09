@@ -1,6 +1,8 @@
 package com.backend.apsor.entities;
 
+import com.backend.apsor.enums.CustomerStatus;
 import com.backend.apsor.enums.Gender;
+import com.backend.apsor.enums.ProviderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -59,5 +61,7 @@ public class Customer {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Enumerated(EnumType.STRING)
+    private CustomerStatus status = CustomerStatus.ACTIVE;
 
 }
