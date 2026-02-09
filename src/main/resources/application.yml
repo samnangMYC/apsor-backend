@@ -55,14 +55,14 @@ logging:
     org.springframework.security.oauth2.server.resource: DEBUG
     org.springframework.web: DEBUG
 
-#storage:
-#  s3:
-#    endpoint: http://localhost:9000
-#    accessKey: ${MINIO_USERNAME}
-#    secretKey: ${MINIO_PASSWORD}
-#    region: us-east-1
-#    bucket: media
-#    publicBaseUrl: http://localhost:9000/media
+storage:
+  s3:
+    endpoint: http://localhost:9000
+    accessKey: ${MINIO_USERNAME}
+    secretKey: ${MINIO_PASSWORD}
+    region: us-east-1
+    bucket: media
+    publicBaseUrl: http://localhost:9000/media
 
 springdoc:
   swagger-ui:
