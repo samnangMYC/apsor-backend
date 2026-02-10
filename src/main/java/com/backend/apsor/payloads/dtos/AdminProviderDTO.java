@@ -3,9 +3,17 @@ package com.backend.apsor.payloads.dtos;
 import com.backend.apsor.entities.Users;
 import com.backend.apsor.enums.BusinessType;
 import com.backend.apsor.enums.ProviderStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AdminProviderDTO {
 
     private Long id;

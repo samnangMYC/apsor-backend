@@ -2,19 +2,17 @@ package com.backend.apsor.entities;
 
 import com.backend.apsor.enums.BusinessType;
 import com.backend.apsor.enums.ProviderStatus;
-import com.backend.apsor.enums.VerificationStatus;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -81,9 +79,6 @@ public class Provider {
     @Enumerated(EnumType.STRING)
     private ProviderStatus status;
 
-    @OneToMany(fetch = FetchType.LAZY,mappedBy = "provider",cascade = CascadeType.ALL)
-    @OrderBy("isPrimary DESC, sortOrder ASC, id ASC")
-    private List<MediaAsset> mediaAsset;
-
-
+    @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ProviderMediaAsset> mediaAssets = new ArrayList<>();
 }

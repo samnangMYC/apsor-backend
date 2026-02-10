@@ -33,12 +33,14 @@ spring:
         jwt:
           issuer-uri: ${KEYCLOAK_ISSUER_URL}
 
+  # Keycloak Authentication Config
 keycloak:
   base-url: ${KEYCLOAK_BASE_URL}
   realm: ${KEYCLOAK_REALM_NAME}
   public-client-id: ${KEYCLOAK_CLIENT_ID}
   client-id: ${KEYCLOAK_CLIENT_ID}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  auth-server-url: ${KEYCLOAK_BASE_URL}/auth/
 
 app:
   frontend:
@@ -48,22 +50,21 @@ app:
     cookie-same-site: "Lax"      # "None" if frontend on different domain (must be Secure)
     cookie-domain: ${COOKIE_DOMAIN}
 
-logging:
-  level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.security.oauth2.server.resource: DEBUG
-    org.springframework.web: DEBUG
+  # File Object Storage Config
+  storage:
+    s3:
+      endpoint: ${MINIO_ENDPOINT}
+      access-key: ${MINIO_ACCESS_KEY}
+      secret-key: ${MINIO_SECRET_KEY}
+      region: ${MINIO_REGION:us-east-1}
+      bucket: ${MINIO_BUCKET:apsor-media}
+      public-base-url: ${MINIO_PUBLIC_BASE_URL:http://localhost:9000} # optional
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-storage:
-  s3:
-    endpoint: http://localhost:9000
-    accessKey: ${MINIO_USERNAME}
-    secretKey: ${MINIO_PASSWORD}
-    region: us-east-1
-    bucket: media
-    publicBaseUrl: http://localhost:9000/media
-
+  # Swagger documentation
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
@@ -71,4 +72,11 @@ springdoc:
     persistAuthorization: true
   api-docs:
     path: /v3/api-docs
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.oauth2.server.resource: DEBUG
+    org.springframework.web: DEBUG
 

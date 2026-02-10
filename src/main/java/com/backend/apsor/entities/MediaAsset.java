@@ -1,22 +1,20 @@
 package com.backend.apsor.entities;
 
-import com.backend.apsor.enums.MediaPurpose;
 import com.backend.apsor.enums.MediaType;
 import com.backend.apsor.enums.MediaVisibility;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
 
 @Data
-@Table(name = "media_assets", indexes = {
-        @Index(name = "ix_media_provider", columnList = "provider_id"),
-//        @Index(name = "ix_media_customer", columnList = "customer_id"),
-//        @Index(name = "ix_media_service", columnList = "service_id"),
-})
+@Table(name = "media_assets")
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class MediaAsset {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,30 +22,39 @@ public class MediaAsset {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "media_type", nullable = false, length = 20)
     private MediaType mediaType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    private MediaPurpose purpose;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(name = "visibility", nullable = false, length = 20)
     private MediaVisibility visibility = MediaVisibility.PUBLIC;
 
-    @Column(nullable = false, length = 1200)
-    private String url;
+    // ----- Storage (MinIO/S3) -----
 
-    @Column(length = 255)
-    private String title;
+    @Column(name = "bucket", nullable = false, length = 80)
+    private String bucket;
 
-    @Column(nullable = false)
-    private Boolean isPrimary = Boolean.FALSE;
+    @Column(name = "object_key", nullable = false, length = 512, unique = true)
+    private String objectKey;
 
-    @Column(nullable = false)
-    private Integer sortOrder = 0;
+    @Column(name = "content_type", nullable = false, length = 120)
+    private String contentType;
 
-    @ManyToOne(fetch = FetchType.LAZY) @JoinColumn(name = "provider_id")
-    private Provider provider;
+    @Column(name = "size_bytes", nullable = false)
+    private Long sizeBytes;
+
+    @Column(name = "etag", length = 80)
+    private String etag;
+
+    // ----- Audit -----
+
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
 
 }

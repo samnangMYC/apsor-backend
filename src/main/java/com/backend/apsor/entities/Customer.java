@@ -2,7 +2,6 @@ package com.backend.apsor.entities;
 
 import com.backend.apsor.enums.CustomerStatus;
 import com.backend.apsor.enums.Gender;
-import com.backend.apsor.enums.ProviderStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

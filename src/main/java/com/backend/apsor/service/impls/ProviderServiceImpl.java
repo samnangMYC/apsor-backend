@@ -6,13 +6,16 @@ import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.exceptions.ApiException;
 import com.backend.apsor.mapper.ProviderMapper;
 import com.backend.apsor.payloads.dtos.AdminProviderDTO;
+import com.backend.apsor.payloads.dtos.ProviderDTO;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.AdminProviderReq;
+import com.backend.apsor.payloads.requests.ProviderReq;
 import com.backend.apsor.payloads.requests.ProviderStatusReq;
 import com.backend.apsor.repositories.ProviderRepo;
 import com.backend.apsor.repositories.UserRepo;
 import com.backend.apsor.service.ProviderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +27,7 @@ public class ProviderServiceImpl implements ProviderService {
     private final UserRepo userRepo;
     private final ProviderRepo providerRepo;
     private final ProviderMapper providerMapper;
+    private final UserServiceImpl userServiceImpl;
 
     @Override
     public AdminProviderDTO createNewProviderByAdmin(AdminProviderReq req) {
@@ -106,7 +110,38 @@ public class ProviderServiceImpl implements ProviderService {
                         id.toString()
                 ));
     }
+    @Override
+    public ProviderDTO createNewProviderByJwt(Jwt jwt, ProviderReq req) {
 
+        Users user = userServiceImpl.loadUserByJwt(jwt);
+
+        // Check if the user already has a provider (prevents duplicates)
+        if (providerRepo.findByUser(user).isPresent()) {
+            throw ApiException.conflict(
+                    ApiErrorCode.PROVIDER_ALREADY_EXISTS,
+                    "A provider already exists for user with id:",
+                    user.getId().toString()
+            );
+        }
+
+        Provider provider = providerMapper.toEntity(req);
+        provider.setUser(user);
+        provider.setAvailable(true);
+
+        return providerMapper.toDTO(providerRepo.save(provider));
+    }
+
+    @Override
+    public ProviderDTO getProviderByJwt(Jwt jwt) {
+        Users user = userServiceImpl.loadUserByJwt(jwt);
+        return providerRepo.findByUser(user)
+                .map(providerMapper::toDTO)
+                .orElseThrow(() -> ApiException.notFound(
+                        ApiErrorCode.PROVIDER_NOT_FOUND,
+                        "Provider not found with id:",
+                        user.getId().toString()
+                ));
+    }
 
 
 }
