@@ -8,6 +8,7 @@ import com.backend.apsor.payloads.requests.ProviderStatusReq;
 import com.backend.apsor.service.ProviderMediaService;
 import com.backend.apsor.service.ProviderService;
 import jakarta.validation.Valid;
+import jakarta.ws.rs.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -63,16 +64,29 @@ public class AdminProviderController {
         return ResponseEntity.ok(providerService.deleteProviderByIdFromAdmin(id));
     }
 
-    @PostMapping("/{providerId}/avartar")
-    public ResponseEntity<MediaAssetDTO> avatar(@PathVariable Long providerId,@RequestPart MultipartFile file) {
+    @PostMapping("/{providerId}/avatar")
+    public ResponseEntity<ProviderMediaDTO> avatar(@PathVariable Long providerId,@RequestPart MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 providerMediaService.uploadNewAvatarFromAdmin(providerId,file)
               );
     }
-    @GetMapping("/{providerId}/avartar")
+    // get lastest image
+    @GetMapping("/{providerId}/avatar")
     public ResponseEntity<ProviderMediaDTO> getById(@PathVariable Long providerId) {
         return ResponseEntity.ok(providerMediaService.getAvatarByIdFromAdmin(providerId));
+    }
+    @PatchMapping("/{providerId}/avatar")
+    public ResponseEntity<ProviderMediaDTO> updateAvatar(@PathVariable Long providerId,
+                                                      @RequestPart MultipartFile file) {
+        log.debug("REST request to update Provider avatar : {}", file.getOriginalFilename());
+        return ResponseEntity.ok(providerMediaService.updateNewAvatarFromAdmin(providerId,file));
 
     }
+    @DeleteMapping("{providerId}/avatar/{mediaId}")
+    public ResponseEntity<String> delete(@PathVariable Long providerId,@PathVariable Long mediaId ) {
+        log.debug("REST request to delete Provider Avatar : {}", providerId);
+        return ResponseEntity.ok(providerService.deleteAvatarByIdFromAdmin(providerId,mediaId));
+    }
+
 
 }

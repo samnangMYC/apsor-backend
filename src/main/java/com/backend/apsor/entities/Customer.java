@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Data
@@ -31,6 +32,9 @@ public class Customer {
             foreignKey = @ForeignKey(name = "fk_customers_users")
     )
     private Users user;
+
+    @OneToMany(mappedBy = "customer",fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<CustomerMediaAsset> mediaAsset;
 
     @Column(name = "dob")
     private LocalDate dob;

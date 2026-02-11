@@ -5,9 +5,7 @@ import com.backend.apsor.payloads.dtos.AdminProviderDTO;
 import com.backend.apsor.payloads.dtos.ProviderDTO;
 import com.backend.apsor.payloads.requests.AdminProviderReq;
 import com.backend.apsor.payloads.requests.ProviderReq;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 
 import java.util.List;
 
@@ -21,7 +19,7 @@ public interface ProviderMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "mediaAssets", ignore = true)
-    @Mapping(target = "available", ignore = true)
+    @Mapping(target = "isAvailable", ignore = true)
     @Mapping(target = "status",ignore = true)
     Provider toEntity(ProviderReq req);
 
@@ -34,7 +32,18 @@ public interface ProviderMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "mediaAssets", ignore = true)
-    @Mapping(target = "available", ignore = true)
+    @Mapping(target = "isAvailable", ignore = true)
+    @Mapping(target = "status",ignore = true)
+    void update(@MappingTarget Provider entity, ProviderReq req);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
+    @Mapping(target = "verifiedAt", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
+    @Mapping(target = "deletedAt", ignore = true)
+    @Mapping(target = "mediaAssets", ignore = true)
+    @Mapping(target = "isAvailable", ignore = true)
     @Mapping(target = "status",ignore = true)
     Provider toEntityFromAdmin(AdminProviderReq req);
 
@@ -47,7 +56,7 @@ public interface ProviderMapper {
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "deletedAt", ignore = true)
     @Mapping(target = "mediaAssets", ignore = true)
-    @Mapping(target = "available", ignore = true)
+    @Mapping(target = "isAvailable", ignore = true)
     @Mapping(target = "status",ignore = true)
     void updateAdminProvider(AdminProviderReq req, @MappingTarget Provider provider);
 

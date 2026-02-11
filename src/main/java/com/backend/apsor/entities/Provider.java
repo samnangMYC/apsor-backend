@@ -36,7 +36,7 @@ public class Provider {
     private Users user;
 
     @Column(name = "is_available", nullable = false)
-    private boolean isAvailable = true;
+    private Boolean isAvailable = Boolean.TRUE;
 
     @Column(name = "display_name", nullable = false, length = 120)
     private String displayName;

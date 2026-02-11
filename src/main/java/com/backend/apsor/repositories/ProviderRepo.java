@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface ProviderRepo extends JpaRepository<Provider, Long> {
     Optional<Provider> findByUser(Users user);
+
+    Optional<Provider> findByUser_Id(Long id);
 }
