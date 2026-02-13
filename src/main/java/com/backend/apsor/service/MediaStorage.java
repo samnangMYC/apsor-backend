@@ -52,7 +52,7 @@ public class MediaStorage {
                     objectKey,
                     e
             );
-            throw e; // let your service map it to FILE_002 with details
+            throw e; // let your services map it to FILE_002 with details
         } catch (SdkClientException e) {
             // Connection / DNS / SSL issues land here
             log.error("S3 client error (network/ssl): bucket={} key={} msg={}",

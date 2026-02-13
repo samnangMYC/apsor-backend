@@ -14,7 +14,9 @@ import java.math.BigDecimal;
 @Builder
 public class UserLocationDTO {
 
-    private Long id;
+    private Long locationId;
+
+    private Long userId;
 
     private String line1;
 

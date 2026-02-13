@@ -60,4 +60,8 @@ public class Category {
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubCategory> subCategories = new ArrayList<>();
+
+    @OneToMany(mappedBy = "category")
+    private List<Services> services = new ArrayList<>();
+
 }

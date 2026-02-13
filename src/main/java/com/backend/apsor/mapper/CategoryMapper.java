@@ -16,6 +16,7 @@ public interface CategoryMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "subCategories",ignore = true)
+    @Mapping(target = "services", ignore = true)
     Category toEntity(CategoryReq req);
 
     CategoryDTO toDto(Category category);
@@ -27,6 +28,7 @@ public interface CategoryMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "subCategories",ignore = true)
+    @Mapping(target = "services", ignore = true)
     void updateEntity(CategoryReq req,@MappingTarget Category category);
 
     List<CategoryDTO> toListDto(List<Category> categories);

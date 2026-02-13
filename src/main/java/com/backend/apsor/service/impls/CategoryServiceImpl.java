@@ -4,6 +4,7 @@ import com.backend.apsor.entities.Category;
 import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.Status;
 import com.backend.apsor.exceptions.ApiException;
+import com.backend.apsor.helper.EntityGenerator;
 import com.backend.apsor.mapper.CategoryMapper;
 import com.backend.apsor.payloads.dtos.CategoryDTO;
 import com.backend.apsor.payloads.requests.CategoryReq;
@@ -45,13 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     private String generateSlug(String name) {
-        String normalized = Normalizer.normalize(name, Normalizer.Form.NFD);
-        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}", "")
-                .replaceAll("[^\\w\\s-]", "")
-                .replaceAll("\\s+", "-")
-                .replaceAll("-+", "-")
-                .toLowerCase()
-                .replaceAll("^-|-$", "");
+        return EntityGenerator.generateSlug(name);
     }
 
     @Override

@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -49,5 +51,8 @@ public class SubCategory {
 
     @Column(name = "deleted_at")
     private Instant deletedAt;
+
+    @OneToMany(mappedBy = "subcategory")
+    private List<Services> services = new ArrayList<>();
 
 }

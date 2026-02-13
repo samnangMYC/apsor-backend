@@ -12,11 +12,11 @@ public interface UserLocationService {
 
     List<UserLocationDTO> getAllUserLocation();
 
-    UserLocationDTO getUserLocationById(Long id);
+    UserLocationDTO getUserLocationById(Jwt jwt,Long id);
 
     UserLocationDTO getUserLocationByJwt(Jwt jwt);
 
-    UserLocationDTO updateUserLocationById(Long id,UserLocationReq req);
+    UserLocationDTO updateUserLocationById(Jwt jwt,Long userLocId,UserLocationReq req);
 
-    String deleteUserLocationById(Long id);
+    String deleteUserLocationById(Jwt jwt,Long id);
 }
