@@ -2,6 +2,7 @@ package com.backend.apsor.payloads.dtos;
 
 import com.backend.apsor.enums.UserStatus;
 import com.backend.apsor.enums.UserType;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +10,22 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
+@JsonPropertyOrder({
+        "id",
+        "keycloakUserId",
+        "username",
+        "email",
+        "firstName",
+        "lastName",
+        "userType",
+        "status",
+        "phoneNumber",
+        "lastLoginAt",
+        "lastSeenAt",
+        "createdAt",
+        "updatedAt",
+        "deletedAt"
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

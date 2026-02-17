@@ -1,8 +1,11 @@
 package com.backend.apsor.controller;
 
+import com.backend.apsor.enums.UserStatus;
+import com.backend.apsor.enums.UserType;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
+import com.backend.apsor.payloads.requests.UserTypeReq;
 import com.backend.apsor.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,9 +54,9 @@ public class AdminUserController {
                             schema = @Schema(implementation = UserDTO.class)) }),
     })
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserByIdFromAdmin(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUserByIdFromAdmin(@PathVariable("id") Long userId) {
         log.info("Received request to get the user by admin");
-        return ResponseEntity.ok(userService.getUserByIdFromAdmin(id));
+        return ResponseEntity.ok(userService.getUserByIdFromAdmin(userId));
 
     }
 
@@ -79,20 +82,27 @@ public class AdminUserController {
                             schema = @Schema(implementation = UserDTO.class)) })
     })
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable Long id, @RequestBody UpdateUserByAdminReq req) {
-        return ResponseEntity.ok(userService.updateUserByAdmin(id, req));
+    public ResponseEntity<UserDTO> update(@PathVariable("id") Long userId, @RequestBody UpdateUserByAdminReq req) {
+        return ResponseEntity.ok(userService.updateUserByAdmin(userId, req));
     }
 
-    // Soft delete (recommended default)
+    // user type
+    @PatchMapping("/{id}/user-type")
+    public ResponseEntity<UserDTO> update(@PathVariable("id") Long userId,@Valid @RequestBody UserTypeReq req) {
+        return ResponseEntity.ok(userService.updateUserTypeByAdmin(userId, req));
+    }
+
+    // Soft delete
     @Operation(summary = "Soft delete user by admin",
             description = "Performs a soft delete on a user, marking them as deleted without removing data.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User soft deleted successfully",
                     content = { @Content(mediaType = "text/plain") }),
     })
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> softDelete(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.softDeleteUserByAdmin(id));
+    public ResponseEntity<String> softDelete(@PathVariable("id") Long userId) {
+        return ResponseEntity.ok(userService.softDeleteUserByAdmin(userId));
     }
 
     // Hard delete (explicit)
@@ -103,8 +113,8 @@ public class AdminUserController {
                     content = { @Content(mediaType = "text/plain") }),
     })
     @DeleteMapping("/{id}/hard")
-    public ResponseEntity<String> hardDelete(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.hardDeleteUserByAdmin(id));
+    public ResponseEntity<String> hardDelete(@PathVariable("id") Long userId) {
+        return ResponseEntity.ok(userService.hardDeleteUserByAdmin(userId));
     }
     @Operation(summary = "Debug user authorities",
             description = "Returns the authorities of the authenticated user for debugging purposes.")

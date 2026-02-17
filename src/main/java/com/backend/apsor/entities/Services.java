@@ -21,6 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "service")
 public class Services {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

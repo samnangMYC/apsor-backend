@@ -3,6 +3,7 @@ package com.backend.apsor.service.impls;
 import com.backend.apsor.entities.*;
 import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.MediaPurpose;
+import com.backend.apsor.enums.ProviderStatus;
 import com.backend.apsor.exceptions.ApiException;
 import com.backend.apsor.mapper.MediaAssetMapper;
 import com.backend.apsor.mapper.ProviderMapper;
@@ -18,7 +19,7 @@ import com.backend.apsor.repositories.MediaAssetRepo;
 import com.backend.apsor.repositories.ProviderMediaAssetRepo;
 import com.backend.apsor.repositories.ProviderRepo;
 import com.backend.apsor.repositories.UserRepo;
-import com.backend.apsor.service.MediaStorage;
+import com.backend.apsor.service.storage.MediaStorage;
 import com.backend.apsor.service.ProviderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -144,6 +145,7 @@ public class ProviderServiceImpl implements ProviderService {
 
         Provider provider = providerMapper.toEntity(req);
         provider.setUser(user);
+        provider.setStatus(ProviderStatus.ACTIVE);
         provider.setIsAvailable(Boolean.TRUE);
 
         return providerMapper.toDTO(providerRepo.save(provider));
@@ -182,8 +184,9 @@ public class ProviderServiceImpl implements ProviderService {
     }
 
     @Override
-    public MediaAssetDTO uploadNewAvatar(Jwt jwt, MultipartFile file) {
+    public ProviderMediaDTO uploadNewAvatar(Jwt jwt, MultipartFile file) {
         validateAvatar(file);
+
         Users user = userServiceImpl.loadUserByJwt(jwt);
 
         Provider provider = providerRepo.findByUser(user)
@@ -208,7 +211,7 @@ public class ProviderServiceImpl implements ProviderService {
                 .sortOrder(0)
                 .build();
 
-        return mediaAssetMapper.toDto(asset);
+        return providerMediaAssetMapper.toDto(link);
     }
 
     @Override

@@ -39,11 +39,11 @@ public class ServiceServiceImpl implements ServiceService {
     public ServiceDTO createNewService(Jwt jwt, ServiceCreateReq req) {
         Users users = userServiceImpl.loadUserByJwt(jwt);
         // prevent duplicate
-        serviceRepo.findByTitle(req.getTitle())
-                .orElseThrow(() -> ApiException.conflict(
-                        ApiErrorCode.DUPLICATE_SERVICE_RESOURCE,
-                        "Service with title " + req.getTitle() + " already exists"
-                ));
+//        serviceRepo.findByTitle(req.getTitle())
+//                .orElseThrow(() -> ApiException.conflict(
+//                        ApiErrorCode.DUPLICATE_SERVICE_RESOURCE,
+//                        "Service with title " + req.getTitle() + " already exists"
+//                ));
 
         // ensure provider exist
         requireProvider(users);
@@ -58,6 +58,7 @@ public class ServiceServiceImpl implements ServiceService {
         services.setProvider(users.getProvider());
         services.setSlug(EntityGenerator.generateSlug(req.getTitle()));
         services.setCategory(subCategory.getCategory());
+        services.setSubcategory(subCategory);
         services.setPublishedAt(Instant.now());
         services.setStatus(ServiceStatus.ACTIVE);
         serviceRepo.save(services);
@@ -76,9 +77,6 @@ public class ServiceServiceImpl implements ServiceService {
 
         // ensure provider exist
         requireProvider(users);
-
-        // find sub-category and ensure active
-        requireActiveSubCategory(req.getSubCategoryId());
 
         // convert req to entity
         Services services = serviceMapper.toEntity(req);

@@ -4,6 +4,8 @@ import com.backend.apsor.payloads.requests.ServiceUpdateReq;
 import com.backend.apsor.payloads.dtos.ServiceDTO;
 import com.backend.apsor.payloads.requests.ServiceCreateReq;
 import com.backend.apsor.service.ServiceService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +21,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/services")
 @RequiredArgsConstructor
+@Tag(
+        name = "Services",
+        description = "Role: CUSTOMER, PROVIDER. Service browsing + service management."
+)
 public class ServiceController {
 
     private final ServiceService serviceService;

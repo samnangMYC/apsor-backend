@@ -32,7 +32,7 @@ public interface ProviderService {
 
     ProviderDTO updateProviderByJwt(Jwt jwt, ProviderReq req);
 
-    MediaAssetDTO uploadNewAvatar(Jwt jwt, MultipartFile file);
+    ProviderMediaDTO uploadNewAvatar(Jwt jwt, MultipartFile file);
 
     ProviderMediaDTO getAvatarByJwt(Jwt jwt);
 

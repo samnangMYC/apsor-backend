@@ -7,5 +7,6 @@ import org.mapstruct.Mapper;
 @Mapper(config = MapStructConfig.class)
 
 public interface MediaAssetMapper {
+
     MediaAssetDTO toDto(MediaAsset entity);
 }

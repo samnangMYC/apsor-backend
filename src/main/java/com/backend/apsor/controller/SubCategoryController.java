@@ -6,6 +6,7 @@ import com.backend.apsor.payloads.requests.SubCategoryStatusReq;
 import com.backend.apsor.payloads.requests.SubCategoryUpdateReq;
 import com.backend.apsor.service.SubCategoryService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +17,12 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/sub-categories")
+@RequestMapping("/api/v1/public/sub-categories")
 @RequiredArgsConstructor
+@Tag(
+        name = "Sub Categories",
+        description = "Role: PUBLIC (or AUTHENTICATED). Endpoints for sub-category listing/management."
+)
 public class SubCategoryController {
     private final SubCategoryService subCategoryService;
 

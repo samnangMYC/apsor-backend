@@ -6,6 +6,8 @@ import com.backend.apsor.payloads.dtos.ProviderMediaDTO;
 import com.backend.apsor.payloads.requests.CustomerReq;
 import com.backend.apsor.service.CustomerService;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/customers")
 @RequiredArgsConstructor
+@Tag(
+        name = "Admin - Customers",
+        description = "Admin endpoints for customer management"
+)
 public class AdminCustomerController {
 
     private final CustomerService customerService;

@@ -6,6 +6,7 @@ import com.backend.apsor.enums.ServicePriceType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -16,6 +17,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Data
 public class ServicePrice {
 
     @Id
@@ -38,11 +40,14 @@ public class ServicePrice {
     @Column(name = "billing_unit", nullable = false, length = 20)
     private ServicePriceBillingUnit billingUnit;
 
+    @Column(name = "amount")
+    private Long amount;
+
     @Column(name = "currency", nullable = false, length = 3)
     private String currency; // ISO 4217: USD, KHR
 
     @Column(name = "is_default", nullable = false)
-    private boolean isDefault;
+    private Boolean isDefault;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 16)
@@ -61,9 +66,6 @@ public class ServicePrice {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
-
-    @Column(name = "deleted_at")
-    private Instant deletedAt;
 
 
 }

@@ -18,7 +18,7 @@ public class AdminProviderDTO {
 
     private Long id;
 
-    private Users user;
+    private UserDTO user;
 
     private String displayName;
 

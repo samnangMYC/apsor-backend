@@ -8,10 +8,7 @@ import com.backend.apsor.exceptions.ApiException;
 import com.backend.apsor.exceptions.KeycloakException;
 import com.backend.apsor.mapper.UserMapper;
 import com.backend.apsor.payloads.dtos.UserDTO;
-import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
-import com.backend.apsor.payloads.requests.SignUpReq;
-import com.backend.apsor.payloads.requests.UpdateMeReq;
-import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
+import com.backend.apsor.payloads.requests.*;
 import com.backend.apsor.repositories.UserRepo;
 import com.backend.apsor.service.UserService;
 import com.backend.apsor.service.auth.KeycloakAdminClient;
@@ -79,6 +76,12 @@ public class UserServiceImpl implements UserService {
             throw ApiException.conflict(
                     ApiErrorCode.USERNAME_ALREADY_EXISTS,
                     "Username already exists",
+                    req.getUsername());
+        }
+        if (usersRepository.existsByPhoneNumber(req.getPhoneNumber())) {
+            throw ApiException.conflict(
+                    ApiErrorCode.PHONE_NUMBER_ALREADY_EXISTS,
+                    "Phone number already exists",
                     req.getUsername());
         }
 
@@ -587,6 +590,20 @@ public class UserServiceImpl implements UserService {
                         kcUserId
                 ));
 
+    }
+
+    @Override
+    public UserDTO updateUserTypeByAdmin(Long userId, UserTypeReq req) {
+
+        return usersRepository.findById(userId)
+                .map(users -> {
+                    users.setUserType(req.getUserType());
+                    return userMapper.toDTO( usersRepository.save(users));
+                })
+                .orElseThrow(() -> ApiException.notFound(
+                        ApiErrorCode.USER_NOT_FOUND,
+                        "User not found with id: " + userId
+                ));
     }
 
 }

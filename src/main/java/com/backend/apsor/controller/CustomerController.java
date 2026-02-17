@@ -40,6 +40,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/customers")
 @RequiredArgsConstructor
+@Tag(
+        name = "Customers",
+        description = "Role: CUSTOMER. Customer profile and customer operations."
+)
+@SecurityRequirement(name = "bearerAuth")
 public class CustomerController {
 
     private final CustomerService customerService;

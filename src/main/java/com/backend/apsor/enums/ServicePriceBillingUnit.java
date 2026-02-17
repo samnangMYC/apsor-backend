@@ -6,6 +6,8 @@ public enum ServicePriceBillingUnit {
     DAY,
     WEEK,
     MONTH,
+    YEAR,
     JOB,
-    ITEM
+    ITEM,
+    PACKAGE
 }

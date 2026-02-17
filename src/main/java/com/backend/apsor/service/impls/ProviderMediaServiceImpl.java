@@ -6,26 +6,19 @@ import com.backend.apsor.entities.ProviderMediaAsset;
 import com.backend.apsor.entities.StorageProps;
 import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.MediaPurpose;
-import com.backend.apsor.enums.MediaType;
-import com.backend.apsor.enums.MediaVisibility;
 import com.backend.apsor.exceptions.ApiException;
-import com.backend.apsor.mapper.MediaAssetMapper;
-import com.backend.apsor.mapper.ProviderMapper;
 import com.backend.apsor.mapper.ProviderMediaAssetMapper;
-import com.backend.apsor.payloads.dtos.MediaAssetDTO;
 import com.backend.apsor.payloads.dtos.ProviderMediaDTO;
 import com.backend.apsor.repositories.MediaAssetRepo;
 import com.backend.apsor.repositories.ProviderMediaAssetRepo;
 import com.backend.apsor.repositories.ProviderRepo;
-import com.backend.apsor.service.MediaStorage;
+import com.backend.apsor.service.storage.MediaStorage;
 import com.backend.apsor.service.ProviderMediaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.Instant;
 
 import static com.backend.apsor.util.MediaUtils.*;
 
@@ -67,7 +60,9 @@ public class ProviderMediaServiceImpl implements ProviderMediaService {
                 .sortOrder(0)
                 .build();
 
-        return providerMediaAssetMapper.toDto(link);
+        ProviderMediaAsset saved = providerMediaAssetRepo.save(link);
+
+        return providerMediaAssetMapper.toDto(saved);
     }
 
     @Override
@@ -117,8 +112,9 @@ public class ProviderMediaServiceImpl implements ProviderMediaService {
                 .purpose(MediaPurpose.AVATAR)
                 .sortOrder(0)
                 .build();
+        ProviderMediaAsset saved = providerMediaAssetRepo.save(link);
 
-        return providerMediaAssetMapper.toDto(link);
+        return providerMediaAssetMapper.toDto(saved);
     }
 
 

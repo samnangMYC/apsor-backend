@@ -1,11 +1,9 @@
 package com.backend.apsor.service;
 
 import com.backend.apsor.entities.Users;
+import com.backend.apsor.enums.UserType;
 import com.backend.apsor.payloads.dtos.UserDTO;
-import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
-import com.backend.apsor.payloads.requests.SignUpReq;
-import com.backend.apsor.payloads.requests.UpdateMeReq;
-import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
+import com.backend.apsor.payloads.requests.*;
 import jakarta.validation.Valid;
 import org.springframework.security.oauth2.jwt.Jwt;
 
@@ -35,4 +33,5 @@ public interface UserService {
 
     Users loadUserByJwt(Jwt jwt);
 
+    UserDTO updateUserTypeByAdmin(Long userId, UserTypeReq type);
 }

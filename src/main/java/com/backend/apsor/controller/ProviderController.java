@@ -1,10 +1,11 @@
 package com.backend.apsor.controller;
 
-import com.backend.apsor.payloads.dtos.MediaAssetDTO;
 import com.backend.apsor.payloads.dtos.ProviderDTO;
 import com.backend.apsor.payloads.dtos.ProviderMediaDTO;
 import com.backend.apsor.payloads.requests.ProviderReq;
 import com.backend.apsor.service.ProviderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RestController
 @RequestMapping("/api/v1/providers")
 @RequiredArgsConstructor
+@Tag(
+        name = "Providers",
+        description = "Role: PROVIDER. Provider profile and provider operations."
+)
+@SecurityRequirement(name = "bearerAuth")
 public class ProviderController {
 
     private final ProviderService providerService;
@@ -42,7 +48,7 @@ public class ProviderController {
     }
 
     @PostMapping("/avatar")
-    public ResponseEntity<MediaAssetDTO> createAvatar(@AuthenticationPrincipal Jwt jwt,
+    public ResponseEntity<ProviderMediaDTO> createAvatar(@AuthenticationPrincipal Jwt jwt,
                                                 @RequestPart MultipartFile file) {
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 providerService.uploadNewAvatar(jwt,file)

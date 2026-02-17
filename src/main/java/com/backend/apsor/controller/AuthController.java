@@ -15,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,12 +38,12 @@ public class AuthController {
     )
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> signUp(@Valid @RequestBody SignUpReq req,
-                                          @RequestParam(defaultValue = "CUSTOMER") UserType type) {
+                                          @RequestParam(name = "type",defaultValue = "CUSTOMER") UserType type) {
         log.info("Received request to sign up user{}", req.getEmail());
         if (type == UserType.PROVIDER) {
-            return ResponseEntity.status(201).body(userService.signUpProvider(req));
+            return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUpProvider(req));
         }
-        return ResponseEntity.status(201).body(userService.signUpCustomer(req));
+        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUpCustomer(req));
     }
 
     @Operation(

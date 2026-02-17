@@ -7,6 +7,8 @@ import com.backend.apsor.payloads.requests.AdminProviderReq;
 import com.backend.apsor.payloads.requests.ProviderStatusReq;
 import com.backend.apsor.service.ProviderMediaService;
 import com.backend.apsor.service.ProviderService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.PathParam;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/providers")
 @RequiredArgsConstructor
+@Tag(
+        name = "Admin - Providers",
+        description = "Role: ADMIN. Admin management of providers."
+)
+@SecurityRequirement(name = "bearerAuth")
 public class AdminProviderController {
 
     private final ProviderService providerService;

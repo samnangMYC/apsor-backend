@@ -3,6 +3,8 @@ package com.backend.apsor.controller;
 import com.backend.apsor.payloads.dtos.UserLocationDTO;
 import com.backend.apsor.payloads.requests.UserLocationReq;
 import com.backend.apsor.service.UserLocationService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,9 +20,15 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/locations")
 @RequiredArgsConstructor
+@Tag(
+        name = "Locations",
+        description = "Role: CUSTOMER, PROVIDER. Manage user and provider saved locations/addresses."
+)
+@SecurityRequirement(name = "bearerAuth")
 public class UserLocationController {
 
     private final UserLocationService userLocationService;
+
     // this endpoint not support admin yet
     @PostMapping
     public ResponseEntity<UserLocationDTO> create(@AuthenticationPrincipal Jwt jwt,

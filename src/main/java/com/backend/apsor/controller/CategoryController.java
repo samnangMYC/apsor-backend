@@ -21,11 +21,14 @@ import java.util.List;
 
 import static org.bouncycastle.asn1.x500.style.RFC4519Style.description;
 
-@Tag(name = "Category Management", description = "Endpoints for managing categories, including creation, retrieval, updates, and deletions.")
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/categories")
+@RequestMapping("/api/v1/public/categories")
 @RequiredArgsConstructor
+@Tag(
+        name = "Categories",
+        description = "Role: PUBLIC. Browse and read categories."
+)
 public class CategoryController {
 
     private final CategoryService categoryService;
