@@ -17,11 +17,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/public/sub-categories")
+@RequestMapping("/api/v1/sub-categories")
 @RequiredArgsConstructor
 @Tag(
         name = "Sub Categories",
-        description = "Role: PUBLIC (or AUTHENTICATED). Endpoints for sub-category listing/management."
+        description = "Role: PUBLIC. Endpoints for sub-category listing/management."
 )
 public class SubCategoryController {
     private final SubCategoryService subCategoryService;

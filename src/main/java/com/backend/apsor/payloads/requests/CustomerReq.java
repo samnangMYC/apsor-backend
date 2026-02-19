@@ -1,8 +1,6 @@
 package com.backend.apsor.payloads.requests;
 
-import com.backend.apsor.entities.Customer;
 import com.backend.apsor.enums.Gender;
-import com.backend.apsor.enums.Status;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
@@ -43,5 +41,7 @@ public class CustomerReq {
     @Size(max = 1000, message = "bio must be at most 1000 characters")
     private String bio;
 
+    @NotNull(message = "Onboarding is required")
+    private Boolean onboardingCompleted;
 
 }

@@ -15,6 +15,7 @@ import java.time.Instant;
 @AllArgsConstructor
 @Entity
 @Data
+@Table(name = "service_media")
 public class ServiceMedia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,10 +2,12 @@ package com.backend.apsor.payloads.dtos;
 
 import com.backend.apsor.enums.ServiceLocationMode;
 import com.backend.apsor.enums.ServiceStatus;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -14,6 +16,25 @@ import java.time.Instant;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Jacksonized
+@JsonPropertyOrder({
+        "id",
+        "publicId",
+        "title",
+        "slug",
+        "description",
+        "categoryId",
+        "subCategoryId",
+        "providerId",
+        "locationMode",
+        "ratingAvg",
+        "ratingCount",
+        "status",
+        "publishedAt",
+        "createdAt",
+        "updatedAt",
+        "suspendedAt"
+})
 public class ServiceDTO {
     private Long id;
     private String publicId;

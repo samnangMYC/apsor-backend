@@ -18,6 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 @Builder
+@Table(name = "categories")
 public class Category {
 
     @Id

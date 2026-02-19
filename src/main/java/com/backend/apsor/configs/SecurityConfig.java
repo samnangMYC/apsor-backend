@@ -3,6 +3,7 @@ package com.backend.apsor.configs;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -37,10 +38,19 @@ public class SecurityConfig {
                                          "/swagger-ui/**",
                                          "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/public/**").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
+                        .requestMatchers("/api/v1/categories/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/sub-categories/**").permitAll()
+                        .requestMatchers("/api/v1/sub-categories/**").hasRole("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/v1/services/**").permitAll()
+                        .requestMatchers("/api/v1/services/**").hasRole("PROVIDER")
+
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/v1/customers/**").hasRole("CUSTOMER")
-                        .requestMatchers("/api/v1/admin/customers/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/providers/**").hasRole("PROVIDER")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2

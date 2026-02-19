@@ -18,7 +18,6 @@ public interface CustomerMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "onboardingCompleted", ignore = true)
     @Mapping(target = "mediaAsset", ignore = true)
     Customer toEntity(CustomerReq customerReq);
 
@@ -31,7 +30,6 @@ public interface CustomerMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "status", ignore = true)
-    @Mapping(target = "onboardingCompleted", ignore = true)
     @Mapping(target = "mediaAsset", ignore = true)
     void updateEntity(CustomerReq customerReq, @MappingTarget Customer customer);
 

@@ -23,7 +23,7 @@ import static org.bouncycastle.asn1.x500.style.RFC4519Style.description;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/public/categories")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 @Tag(
         name = "Categories",

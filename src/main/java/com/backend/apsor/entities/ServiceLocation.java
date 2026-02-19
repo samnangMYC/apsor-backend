@@ -11,6 +11,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "service_locations")
 public class ServiceLocation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

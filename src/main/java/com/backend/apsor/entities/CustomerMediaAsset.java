@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 @Entity
+@Table(name = "customer_media_assets")
 public class CustomerMediaAsset {
 
     @Id

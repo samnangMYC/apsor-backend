@@ -21,7 +21,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "service")
+@Table(name = "services")
 public class Services {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -102,5 +102,9 @@ public class Services {
     @OneToMany(mappedBy = "service",fetch = FetchType.LAZY,orphanRemoval = true)
     @Builder.Default
     private List<ServicePrice> prices = new ArrayList<>();
+
+    @OneToMany(mappedBy = "service",fetch = FetchType.LAZY,orphanRemoval = true)
+    @Builder.Default
+    private List<Order> orders = new ArrayList<>();
 
 }

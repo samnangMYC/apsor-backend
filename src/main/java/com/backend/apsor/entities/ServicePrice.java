@@ -12,13 +12,16 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Data
-public class ServicePrice {
+@Table(name = "service_prices")
+public class  ServicePrice {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,6 +69,10 @@ public class ServicePrice {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     private Instant updatedAt;
+
+//    @OneToMany(mappedBy = "service",fetch = FetchType.LAZY)
+//    @Builder.Default
+//    private List<Order> orders = new ArrayList<>();
 
 
 }

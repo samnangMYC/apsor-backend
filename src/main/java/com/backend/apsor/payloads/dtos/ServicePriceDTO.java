@@ -3,10 +3,12 @@ package com.backend.apsor.payloads.dtos;
 import com.backend.apsor.enums.ServicePriceBillingUnit;
 import com.backend.apsor.enums.ServicePriceStatus;
 import com.backend.apsor.enums.ServicePriceType;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
 import java.time.Instant;
 
@@ -14,11 +16,24 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Jacksonized
+@JsonPropertyOrder({
+        "id",
+        "name",
+        "priceType",
+        "billingUnit",
+        "amount",
+        "currency",
+        "isDefault",
+        "status",
+        "minUnits",
+        "maxUnits",
+        "createdAt",
+        "updatedAt"
+})
 public class ServicePriceDTO {
 
     private Long id;
-
-    private ServiceDTO service;
 
     private String name;
 
