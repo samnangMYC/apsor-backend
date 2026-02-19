@@ -73,8 +73,10 @@ public enum ApiErrorCode {
 
     // Service Media
     SERVICE_MEDIA_NOT_FOUND("SERVICE_001"),
-
     INVALID_REQUEST("REQ_001"),
+
+    // order
+    ORDER_NOT_FOUND("ORDER_001"),
 
     // System
     INTERNAL_ERROR("SYS_001");
