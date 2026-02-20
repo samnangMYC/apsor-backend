@@ -18,7 +18,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/locations")
+@RequestMapping("/api/v1/user/locations")
 @RequiredArgsConstructor
 @Tag(
         name = "Locations",

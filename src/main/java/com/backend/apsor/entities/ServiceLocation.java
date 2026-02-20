@@ -3,6 +3,7 @@ package com.backend.apsor.entities;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 
@@ -27,7 +28,15 @@ public class ServiceLocation {
             foreignKey = @ForeignKey(name = "fk_service_locations_location"))
     private Location location;
 
+    @Column(name = "is_default", nullable = false)
+    private Boolean isDefault;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
+    private Instant updatedAt;
+
 }

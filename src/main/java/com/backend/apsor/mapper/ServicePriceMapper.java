@@ -17,7 +17,6 @@ public interface ServicePriceMapper {
     @Mapping(target = "status",ignore = true)
     @Mapping(target = "service",ignore = true)
     @Mapping(target = "createdAt",ignore = true)
-    @Mapping(target = "orders", ignore = true)
     @Mapping(target = "updatedAt",ignore = true)
     ServicePrice toEntity(ServiceCreatePriceReq req);
 
@@ -25,7 +24,6 @@ public interface ServicePriceMapper {
 
     @Mapping(target = "id",ignore = true)
     @Mapping(target = "service",ignore = true)
-    @Mapping(target = "orders", ignore = true)
     @Mapping(target = "createdAt",ignore = true)
     @Mapping(target = "updatedAt",ignore = true)
     void update(ServiceUpdatePriceReq req, @MappingTarget ServicePrice servicePrice);

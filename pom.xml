@@ -127,7 +127,7 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
-			<version>2.11.0</version> <!-- or any recent version -->
+			<version>2.11.0</version>
 		</dependency>
 
 		<dependency>
@@ -155,7 +155,7 @@
 			<version>3.0.1</version>
 		</dependency>
 
-		<!-- Source: https://mvnrepository.com/artifact/software.amazon.awssdk/s3 -->
+		<!-- Object Storage -->
 		<dependency>
 			<groupId>software.amazon.awssdk</groupId>
 			<artifactId>s3</artifactId>
@@ -169,11 +169,32 @@
 			<type>pom</type>
 			<scope>import</scope>
 		</dependency>
-		<!-- Source: https://mvnrepository.com/artifact/com.jlefebure/spring-boot-starter-minio -->
 		<dependency>
 			<groupId>com.jlefebure</groupId>
 			<artifactId>spring-boot-starter-minio</artifactId>
 			<version>1.10</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Actuator  -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- Prometheus registry -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+			<version>1.16.3</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- Source: https://mvnrepository.com/artifact/org.springframework/spring-aop -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>7.0.4</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
