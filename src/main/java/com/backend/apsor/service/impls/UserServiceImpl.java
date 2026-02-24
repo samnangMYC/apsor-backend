@@ -48,9 +48,6 @@ public class UserServiceImpl implements UserService {
     @Value("${keycloak.realm}")
     private String REALM;
 
-    // -------------------------
-    // Signup (public)
-    // -------------------------
     @Override
     @Transactional
     public UserDTO signUpCustomer(SignUpReq req) {

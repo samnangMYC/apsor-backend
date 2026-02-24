@@ -1,61 +1,59 @@
 spring:
   application:
     name: apsor
+
   datasource:
-    url: jdbc:postgresql://localhost:5532/apsordb
-    username: ${POSTGRES_USER}
-    password: ${POSTGRES_PASSWORD}
-    driver-class-name: org.postgresql.Driver
+    # In-memory DB for tests (PostgreSQL compatibility mode)
+    url: jdbc:h2:mem:apsordb_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+
   jpa:
     hibernate:
-      ddl-auto: update
-    show-sql: false
+      ddl-auto: create-drop
+    show-sql: true
     properties:
       hibernate:
         format_sql: true
-  server:
-    error:
-      include-message: always
-      include-binding-errors: always
-      include-stacktrace: never
-      whitelabel:
-        enabled: false
 
-  security:
-    oauth2:
-      client:
-        registration:
-          keycloak:
-            client-id: ${KEYCLOAK_CLIENT_ID}
-            client-secret: ${KEYCLOAK_CLIENT_SECRET}
-            authorization-grant-type: authorization_code
-            redirect-uri: "{baseUrl}/login/oauth2/code/keycloak"
-            scope: openid,profile,email
-        provider:
-          keycloak:
-            issuer-uri: ${KEYCLOAK_ISSUER_URL}
-      resourceserver:
-        jwt:
-          issuer-uri: ${KEYCLOAK_ISSUER_URL}
+  # ✅ OPTIONAL: if you don't want Keycloak/OAuth2 involved in tests,
+  # exclude security auto-configs so the app starts without contacting an issuer.
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.client.servlet.OAuth2ClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.servlet.OAuth2ResourceServerAutoConfiguration
 
+server:
+  # random port in tests to avoid conflicts
+  port: 0
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    whitelabel:
+      enabled: false
+
+# Keep your custom props but avoid unresolved ${ENV_VAR} in tests
 keycloak:
-  base-url: ${KEYCLOAK_BASE_URL}
-  realm: ${KEYCLOAK_REALM_NAME}
-  public-client-id: ${KEYCLOAK_CLIENT_ID}
-  client-id: ${KEYCLOAK_CLIENT_ID}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET}
+  base-url: http://localhost:18080
+  realm: test
+  public-client-id: test-client
+  client-id: test-client
+  client-secret: test-secret
 
 app:
   frontend:
-    verify-redirect-uri: "${FRONTEND_URL}"
+    verify-redirect-uri: "http://localhost"
   auth:
-    cookie-secure: false         # true in production (HTTPS)
-    cookie-same-site: "Lax"      # "None" if frontend on different domain (must be Secure)
-    cookie-domain: ${COOKIE_DOMAIN}
+    cookie-secure: false
+    cookie-same-site: "Lax"
+    cookie-domain: localhost
 
 logging:
   level:
-    org.springframework.security: DEBUG
-    org.springframework.security.oauth2: DEBUG
-    org.springframework.security.oauth2.server.resource: DEBUG
-    org.springframework.web: DEBUG
+    org.springframework.security: INFO
+    org.springframework.security.oauth2: INFO
+    org.springframework.security.oauth2.server.resource: INFO
+    org.springframework.web: INFO

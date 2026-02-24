@@ -1,126 +1,109 @@
 package com.backend.apsor.controller;
 
-import com.backend.apsor.enums.UserStatus;
-import com.backend.apsor.enums.UserType;
 import com.backend.apsor.payloads.dtos.UserDTO;
 import com.backend.apsor.payloads.requests.CreateUserByAdminReq;
 import com.backend.apsor.payloads.requests.UpdateUserByAdminReq;
 import com.backend.apsor.payloads.requests.UserTypeReq;
 import com.backend.apsor.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Manage Users By Admin", description = "Endpoints for administrators to manage users, including creation, retrieval, update, and deletion operations.")
+@Tag(name = "Manage Users By Admin", description = "Endpoints for administrators to manage users.")
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
 public class AdminUserController {
+
     private final UserService userService;
 
-    // -----------------------
-    // Admin (manage users)
-    // -----------------------
-    @Operation(summary = "Create a new user by admin",
-            description = "Allows an admin to create a new user account with the provided details.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "User created successfully",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) })
-    })
+    @Operation(summary = "Create a new user by admin")
     @PostMapping
-    public ResponseEntity<UserDTO> create(@Valid @RequestBody CreateUserByAdminReq req) {
+    public ResponseEntity<UserDTO> create(@AuthenticationPrincipal Jwt jwt,
+                                          HttpServletRequest request,
+                                          @Valid @RequestBody CreateUserByAdminReq req) {
         log.info("Received request to create user by admin");
-        return ResponseEntity.status(201).body(userService.createUserByAdmin(req));
+        UserDTO created = userService.createUserByAdmin(req);
+
+        return ResponseEntity.status(201).body(created);
     }
 
-    @Operation(summary = "Get user by ID from admin",
-            description = "Retrieves a specific user by their ID for admin purposes.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User found",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-    })
+    @Operation(summary = "Get user by ID from admin")
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserByIdFromAdmin(@PathVariable("id") Long userId) {
+    public ResponseEntity<UserDTO> getUserByIdFromAdmin(@AuthenticationPrincipal Jwt jwt,
+                                                        HttpServletRequest request,
+                                                        @PathVariable("id") Long userId) {
         log.info("Received request to get the user by admin");
-        return ResponseEntity.ok(userService.getUserByIdFromAdmin(userId));
+        UserDTO dto = userService.getUserByIdFromAdmin(userId);
 
+        return ResponseEntity.ok(dto);
     }
 
-    @Operation(summary = "Get all users from admin",
-            description = "Retrieves a list of all users for admin review.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "List of users retrieved",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) }),
-    })
-
+    @Operation(summary = "Get all users from admin")
     @GetMapping
-    public ResponseEntity<List<UserDTO>> getAllUserFromAdmin(){
+    public ResponseEntity<List<UserDTO>> getAllUserFromAdmin(@AuthenticationPrincipal Jwt jwt,
+                                                             HttpServletRequest request) {
         log.info("Received request to get all users");
-        return ResponseEntity.ok(userService.getAllUserFromAdmin());
+        List<UserDTO> list = userService.getAllUserFromAdmin();
+
+        return ResponseEntity.ok(list);
     }
 
-    @Operation(summary = "Update user by admin",
-            description = "Updates an existing user's details by admin.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User updated successfully",
-                    content = { @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = UserDTO.class)) })
-    })
+    @Operation(summary = "Update user by admin")
     @PatchMapping("/{id}")
-    public ResponseEntity<UserDTO> update(@PathVariable("id") Long userId, @RequestBody UpdateUserByAdminReq req) {
-        return ResponseEntity.ok(userService.updateUserByAdmin(userId, req));
+    public ResponseEntity<UserDTO> updateUser(@AuthenticationPrincipal Jwt jwt,
+                                              HttpServletRequest request,
+                                              @PathVariable("id") Long userId,
+                                              @RequestBody UpdateUserByAdminReq req) {
+        UserDTO updated = userService.updateUserByAdmin(userId, req);
+
+        return ResponseEntity.ok(updated);
     }
 
-    // user type
+    @Operation(summary = "Update user type by admin")
     @PatchMapping("/{id}/user-type")
-    public ResponseEntity<UserDTO> update(@PathVariable("id") Long userId,@Valid @RequestBody UserTypeReq req) {
-        return ResponseEntity.ok(userService.updateUserTypeByAdmin(userId, req));
+    public ResponseEntity<UserDTO> updateUserType(@AuthenticationPrincipal Jwt jwt,
+                                                  HttpServletRequest request,
+                                                  @PathVariable("id") Long userId,
+                                                  @Valid @RequestBody UserTypeReq req) {
+        UserDTO updated = userService.updateUserTypeByAdmin(userId, req);
+
+        return ResponseEntity.ok(updated);
     }
 
-    // Soft delete
-    @Operation(summary = "Soft delete user by admin",
-            description = "Performs a soft delete on a user, marking them as deleted without removing data.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User soft deleted successfully",
-                    content = { @Content(mediaType = "text/plain") }),
-    })
-
+    @Operation(summary = "Soft delete user by admin")
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> softDelete(@PathVariable("id") Long userId) {
-        return ResponseEntity.ok(userService.softDeleteUserByAdmin(userId));
+    public ResponseEntity<String> softDelete(@AuthenticationPrincipal Jwt jwt,
+                                             HttpServletRequest request,
+                                             @PathVariable("id") Long userId) {
+        String msg = userService.softDeleteUserByAdmin(userId);
+
+        return ResponseEntity.ok(msg);
     }
 
-    // Hard delete (explicit)
-    @Operation(summary = "Hard delete user by admin",
-            description = "Permanently deletes a user and their data.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "User hard deleted successfully",
-                    content = { @Content(mediaType = "text/plain") }),
-    })
+    @Operation(summary = "Hard delete user by admin")
     @DeleteMapping("/{id}/hard")
-    public ResponseEntity<String> hardDelete(@PathVariable("id") Long userId) {
-        return ResponseEntity.ok(userService.hardDeleteUserByAdmin(userId));
+    public ResponseEntity<String> hardDelete(@AuthenticationPrincipal Jwt jwt,
+                                             HttpServletRequest request,
+                                             @PathVariable("id") Long userId) {
+        String msg = userService.hardDeleteUserByAdmin(userId);
+
+        return ResponseEntity.ok(msg);
     }
-    @Operation(summary = "Debug user authorities",
-            description = "Returns the authorities of the authenticated user for debugging purposes.")
+
     @GetMapping("/debug/authorities")
     public Object authorities(Authentication auth) {
         return auth.getAuthorities();
     }
-
 }

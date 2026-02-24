@@ -69,14 +69,16 @@ services:
       KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
       KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_ADMIN_USERNAME}
       KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
-
       KC_HTTP_ENABLED: "true"
       KC_HOSTNAME_STRICT: "false"
-      KC_HOSTNAME: "localhost"           # ← Add this
+      KC_HOSTNAME: "localhost"
       KC_HOSTNAME_PORT: "8080"
       KC_HOSTNAME_STRICT_HTTPS: "false"
+      KC_METRICS_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
     ports:
       - "127.0.0.1:8443:8080"
+      - "19000:9000"
     networks:
       - backend
     depends_on:
@@ -94,6 +96,7 @@ services:
     environment:
       MINIO_ROOT_USER: ${MINIO_USERNAME}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+      MINIO_PROMETHEUS_AUTH_TYPE: public
     ports:
       - "9000:9000"   # S3 API
       - "9001:9001"   # Console UI
@@ -106,34 +109,104 @@ services:
       - pgadmin
       - keycloak_postgres
       - keycloak
+    healthcheck:
+      test: [ "CMD-SHELL", "wget -qO- http://localhost:9000/minio/health/ready >/dev/null 2>&1 || curl -fsS http://localhost:9000/minio/health/ready >/dev/null" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
 
   minio-init:
     image: minio/mc:latest
     depends_on:
-      - minio
+      minio:
+        condition: service_healthy   # IMPORTANT
     entrypoint: >
       /bin/sh -c "
-      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD};
-      mc mb -p local/apsor-media || true;
-      # OPTIONAL: make bucket public-read for downloads:
-      mc anonymous set download local/apsor-media || true;
-      exit 0;
+      mc alias set local http://minio:9000 $${MINIO_ROOT_USER} $${MINIO_ROOT_PASSWORD} &&
+      mc mb -p local/apsor-media || true &&
+      mc anonymous set download local/apsor-media || true
       "
     environment:
       MINIO_ROOT_USER: ${MINIO_USERNAME}
       MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/ready" ]
-      interval: 3s
-      timeout: 2s
-      retries: 30
+
+  prometheus:
+    image: prom/prometheus:v3.10.0-rc.1
+    container_name: prometheus-apsor-metric
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - backend
+    depends_on:
+      - postgres
+      - pgadmin
+      - keycloak
+      - minio
+
+  grafana:
+    image: grafana/grafana:12.4.0-19263646129
+    container_name: grafana-apsor-log
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USERNAME:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - backend
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:3.6.6
+    container_name: loki-apsor
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki.yml
+    volumes:
+      - ./loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/loki
+    networks:
+      - backend
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:3.6.6
+    container_name: promtail-apsor
+    command: -config.file=/etc/promtail/promtail.yml
+    volumes:
+      - ./promtail:/etc/promtail:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - backend
+    depends_on:
+      - loki
+    restart: unless-stopped
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:9.3.0
+    container_name: logstash
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
 
 volumes:
   pgdata:
   keycloak_pgdata:
   pgadmin_data:
   minio_data:
-  pgdata_test:
+  grafana_data:
+  loki_data:
 
 networks:
   backend:

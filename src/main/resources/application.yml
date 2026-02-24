@@ -79,6 +79,10 @@ logging:
     org.springframework.security.oauth2: DEBUG
     org.springframework.security.oauth2.server.resource: DEBUG
     org.springframework.web: DEBUG
+#  pattern:
+#    console: "%msg%n"
+loki:
+  url: ${LOKI_BASE_URL}
 
 management:
   endpoints:

@@ -1,7 +1,9 @@
 package com.backend.apsor.configs;
 
+import org.springframework.boot.security.autoconfigure.actuate.web.servlet.EndpointRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
@@ -51,6 +53,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/providers/**").hasRole("PROVIDER")
+
+                        .requestMatchers("/actuator/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2
@@ -59,4 +63,15 @@ public class SecurityConfig {
 
         return http.build();
     }
+//    @Bean
+//    @Order(1)
+//    SecurityFilterChain actuatorChain(HttpSecurity http) throws Exception {
+//        http.securityMatcher(EndpointRequest.toAnyEndpoint())
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(EndpointRequest.to("health", "prometheus")).permitAll()
+//                        .anyRequest().hasRole("ADMIN")
+//                )
+//                .csrf(csrf -> csrf.disable());
+//        return http.build();
+//    }
 }

@@ -28,7 +28,6 @@ public class AuthController {
 
     private final UserService userService;
     private final AuthService authService;
-
     // -----------------------
     // Public Signup (Customer/Provider)
     // -----------------------
@@ -36,14 +35,21 @@ public class AuthController {
             summary = "Signup",
             description = "Public signup. Default type=CUSTOMER. Use type=PROVIDER to create provider."
     )
+
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> signUp(@Valid @RequestBody SignUpReq req,
-                                          @RequestParam(name = "type",defaultValue = "CUSTOMER") UserType type) {
-        log.info("Received request to sign up user{}", req.getEmail());
+                                          @RequestParam(name = "type", defaultValue = "CUSTOMER") UserType type,
+                                          HttpServletRequest request) {
+        log.info("Received request to sign up user {}", req.getEmail());
+
+        UserDTO created;
         if (type == UserType.PROVIDER) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUpProvider(req));
+            created = userService.signUpProvider(req);
+        } else {
+            created = userService.signUpCustomer(req);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(userService.signUpCustomer(req));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @Operation(
@@ -51,9 +57,17 @@ public class AuthController {
             description = "Sets HttpOnly cookies ACCESS_TOKEN and REFRESH_TOKEN. For Swagger testing, use Bearer token auth with a token from Keycloak token endpoint."
     )
     @PostMapping("/signin")
-    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody SignInReq req, HttpServletResponse response) {
+    public ResponseEntity<AuthResponse> signIn(@Valid @RequestBody SignInReq req,
+                                               HttpServletRequest request,
+                                               HttpServletResponse response) {
         log.info("Received request to sign in with: {}", req.getUsername());
-        return ResponseEntity.ok(authService.login(req, response));
+
+        try {
+            AuthResponse res = authService.login(req, response);
+            return ResponseEntity.ok(res);
+        } catch (Exception ex) {
+            throw ex;
+        }
     }
 
     @Operation(
@@ -63,8 +77,11 @@ public class AuthController {
             security = { @SecurityRequirement(name = "cookieAuth") }
     )
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(HttpServletRequest request, HttpServletResponse response) {
-        return ResponseEntity.ok(authService.refresh(request, response));
+    public ResponseEntity<AuthResponse> refresh(HttpServletRequest request,
+                                                HttpServletResponse response) {
+            AuthResponse res = authService.refresh(request, response);
+
+            return ResponseEntity.ok(res);
     }
 
     @Operation(
@@ -72,10 +89,12 @@ public class AuthController {
             description = "Clears cookies (and optionally calls Keycloak logout).",
             security = { @SecurityRequirement(name = "cookieAuth") }
     )
-    @PostMapping("/signout")
-    public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> logout(HttpServletRequest request,
+                                         HttpServletResponse response) {
         log.info("REST request to logout");
-        return ResponseEntity.ok(authService.logout(request, response));
+        String msg = authService.logout(request, response);
+
+        return ResponseEntity.ok(msg);
     }
 
     // forgot password,email verification for future release
