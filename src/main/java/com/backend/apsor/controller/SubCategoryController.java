@@ -28,7 +28,6 @@ public class SubCategoryController {
 
     @PostMapping
     public ResponseEntity<SubCategoryDTO> create(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Request body for creating a category", required = true)
             @Valid @RequestBody SubCategoryReq req) {
         log.debug("REST request to save SubCategory : {}", req);
         return ResponseEntity.status(201).body(subCategoryService.createNewSubCategory(req));

@@ -11,11 +11,15 @@ import com.backend.apsor.payloads.requests.*;
 import com.backend.apsor.repositories.CategoryRepo;
 import com.backend.apsor.repositories.SubCategoryRepo;
 import com.backend.apsor.service.SubCategoryService;
+import com.backend.apsor.util.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
+
+import static com.backend.apsor.enums.ApiErrorCode.INVALID_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -24,11 +28,12 @@ public class SubCategoryServiceImpl implements SubCategoryService {
     private final SubCategoryRepo subCategoryRepo;
     private final SubCategoryMapper subCategoryMapper;
     private final CategoryRepo categoryRepo;
+    private static final int SLUG_MAX_LEN = 140;
 
     @Override
     public SubCategoryDTO createNewSubCategory(SubCategoryReq req) {
 
-        Long categoryId = Long.valueOf(req.getCategoryId());
+        Long categoryId = req.getCategoryId();
 
         Category category = categoryRepo.findById(categoryId)
                 .orElseThrow(() -> ApiException.notFound(
@@ -37,21 +42,27 @@ public class SubCategoryServiceImpl implements SubCategoryService {
                         categoryId
                 ));
 
-        String name = req.getName().trim();
+        String enName = Optional.ofNullable(req.getName())
+                .map(m -> m.get("en"))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .orElseThrow(() -> ApiException.badRequest(
+                        INVALID_REQUEST,
+                        "Sub Category English name (name.en) is required"
+                ));
 
-        if (subCategoryRepo.existsByCategory_IdAndNameIgnoreCase(categoryId, name)) {
-            throw ApiException.conflict(
-                    ApiErrorCode.SUBCATEGORY_NAME_EXISTS,
-                    "SubCategory name already exists in this category: %s",
-                    name
-            );
-        }
+        String slug = SlugUtil.slugify(enName, SLUG_MAX_LEN)
+                .orElseThrow(() -> ApiException.badRequest(
+                        INVALID_REQUEST,
+                        "Cannot generate slug from name.en"
+                ));
 
         SubCategory subCategory = subCategoryMapper.toEntity(req);
         subCategory.setCategory(category);
+        subCategory.setSlug(slug);
+        subCategory.setStatus(Status.ACTIVE);
 
-        SubCategory saved = subCategoryRepo.save(subCategory);
-        return subCategoryMapper.toDto(saved);
+        return subCategoryMapper.toDto(subCategoryRepo.save(subCategory));
     }
 
     @Override

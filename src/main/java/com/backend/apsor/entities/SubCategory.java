@@ -6,11 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Data
 @NoArgsConstructor
@@ -30,11 +33,16 @@ public class SubCategory {
     )
     private Category category;
 
-    @Column(name = "name", length = 120, nullable = false)
-    private String name; // e.g. "Home Cleaning"
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "name", columnDefinition = "jsonb", nullable = false)
+    private Map<String, String> name;
 
-    @Column(name = "description", length = 500)
-    private String description;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description", columnDefinition = "jsonb")
+    private Map<String, String> description;
+
+    @Column(nullable = false, length = 140, unique = true)
+    private String slug;
 
     @Column(name = "sort_order", nullable = false)
     private Integer sortOrder = 0;

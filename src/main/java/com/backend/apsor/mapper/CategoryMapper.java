@@ -22,6 +22,7 @@ public interface CategoryMapper {
     @Mapping(target = "subCategories",ignore = true)
     @Mapping(target = "services", ignore = true)
     @Mapping(target = "categoryMedia", ignore = true)
+    @Mapping(target = "slug",ignore = true)
     Category toEntity(CategoryReq req);
 
     @Mapping(target = "imageUrl",source = "categoryMedia", qualifiedByName = "firstImageObjectKey")
@@ -36,6 +37,7 @@ public interface CategoryMapper {
     @Mapping(target = "subCategories",ignore = true)
     @Mapping(target = "services", ignore = true)
     @Mapping(target = "categoryMedia", ignore = true)
+    @Mapping(target = "slug",ignore = true)
     void updateEntity(CategoryReq req,@MappingTarget Category category);
 
     @Mapping(target = "imageUrl",source = "categoryMedia", qualifiedByName = "firstImageObjectKey")

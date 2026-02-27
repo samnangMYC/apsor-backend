@@ -1,9 +1,6 @@
 package com.backend.apsor.payloads.requests;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,14 +15,12 @@ import java.util.Map;
 public class CategoryReq {
 
     @NotEmpty(message = "name is required")
-    private Map<String, String> name;
+    private Map<String, @NotBlank(message = "name value cannot be blank") String> name;
 
-    // optional: if null -> auto-generate from name
-    @Size(max = 140)
-    private String slug;
+    private Map<String, @NotBlank(message = "description value cannot be blank") String> description;
 
-    private Map<String, String> description;
-
+    @NotNull(message = "sortOrder is required")
+    @Min(value = 0, message = "sortOrder must be at least 0")
     private Integer sortOrder;
 
 }

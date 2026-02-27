@@ -18,6 +18,7 @@ public interface SubCategoryMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "services", ignore = true)
+    @Mapping(target = "slug", ignore = true)
     SubCategory toEntity(SubCategoryReq req);
 
     @Mapping(target = "categoryId", source = "category.id")
@@ -31,6 +32,7 @@ public interface SubCategoryMapper {
     @Mapping(target = "category", ignore = true)
     @Mapping(target = "status", ignore = true)
     @Mapping(target = "services", ignore = true)
+    @Mapping(target = "slug", ignore = true)
     void updateEntity(SubCategoryUpdateReq req, @MappingTarget SubCategory category);
 
     List<SubCategoryDTO> toListDto(List<SubCategory> categories);
