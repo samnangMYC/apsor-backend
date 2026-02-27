@@ -21,7 +21,7 @@ public interface ServiceAvailabilityMapper {
     @Mapping(target = "updatedAt",ignore = true)
     ServiceAvailability toEntity(ServiceAvailabilityReq req);
 
-    @Mapping(target = "serviceId",ignore = true)
+    @Mapping(target = "serviceId", source = "service.id")
     ServiceAvailabilityDTO toDto(ServiceAvailability availability);
 
     @Mapping(target = "id",ignore = true)

@@ -107,4 +107,8 @@ public class Services {
     @Builder.Default
     private List<Order> orders = new ArrayList<>();
 
+    @OneToMany(mappedBy = "service",fetch = FetchType.LAZY,orphanRemoval = true)
+    @Builder.Default
+    private List<ServiceAvailability> availabilities = new ArrayList<>();
+
 }

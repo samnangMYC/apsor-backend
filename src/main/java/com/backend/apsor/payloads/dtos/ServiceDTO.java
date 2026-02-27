@@ -1,5 +1,6 @@
 package com.backend.apsor.payloads.dtos;
 
+import com.backend.apsor.entities.ServicePrice;
 import com.backend.apsor.enums.ServiceLocationMode;
 import com.backend.apsor.enums.ServiceStatus;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -11,6 +12,7 @@ import lombok.extern.jackson.Jacksonized;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -44,6 +46,10 @@ public class ServiceDTO {
     private Long subCategoryId;
     private Long providerId;
     private String slug;
+    private List<ServicePriceDTO> price;
+    private List<ServiceAvailabilityDTO> availability;
+    private List<ServiceMediaDTO> assets;
+    private List<ServiceLocationDTO> location;
     private ServiceLocationMode locationMode;
     private Instant publishedAt;
     private BigDecimal ratingAvg;

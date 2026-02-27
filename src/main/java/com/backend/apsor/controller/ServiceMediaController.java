@@ -31,7 +31,10 @@ public class ServiceMediaController {
     private final ServiceMediaService serviceMediaService;
 
     // create thumbnail
-    @PostMapping(value = "/{id}/gallery", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/{id}/gallery",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
     public ResponseEntity<List<ServiceMediaDTO>> gallery(
             @PathVariable("id") Long serviceId,
             @RequestPart("files") List<MultipartFile> files

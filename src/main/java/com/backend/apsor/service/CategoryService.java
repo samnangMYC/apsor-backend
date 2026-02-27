@@ -1,10 +1,11 @@
 package com.backend.apsor.service;
 
-import com.backend.apsor.enums.Status;
 import com.backend.apsor.payloads.dtos.CategoryDTO;
+import com.backend.apsor.payloads.dtos.CategoryMediaDTO;
 import com.backend.apsor.payloads.requests.CategoryReq;
 import com.backend.apsor.payloads.requests.CategoryStatusReq;
 import jakarta.validation.Valid;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -23,4 +24,5 @@ public interface CategoryService {
     String softDeleteById(Long id);
 
     CategoryDTO updateStatusById(Long id, CategoryStatusReq status);
+
 }

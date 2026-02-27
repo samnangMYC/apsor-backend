@@ -224,10 +224,5 @@ public class CustomerServiceImpl implements CustomerService {
         return "Successfully deleted customer avatar";
     }
 
-    @Override
-    public ProviderMediaDTO uploadNewAvatar(Jwt jwt, MultipartFile file) {
-        return null;
-    }
-
 
 }

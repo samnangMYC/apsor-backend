@@ -4,19 +4,24 @@ import com.backend.apsor.entities.Category;
 import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.Status;
 import com.backend.apsor.exceptions.ApiException;
-import com.backend.apsor.helper.EntityGenerator;
 import com.backend.apsor.mapper.CategoryMapper;
 import com.backend.apsor.payloads.dtos.CategoryDTO;
 import com.backend.apsor.payloads.requests.CategoryReq;
 import com.backend.apsor.payloads.requests.CategoryStatusReq;
 import com.backend.apsor.repositories.CategoryRepo;
 import com.backend.apsor.service.CategoryService;
+import com.backend.apsor.util.SlugUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.text.Normalizer;
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static com.backend.apsor.enums.ApiErrorCode.CATEGORY_SLUG_EXISTS;
+import static com.backend.apsor.enums.ApiErrorCode.INVALID_REQUEST;
 
 @Service
 @RequiredArgsConstructor
@@ -24,30 +29,41 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepo categoryRepository;
     private final CategoryMapper categoryMapper;
+    private static final int SLUG_MAX_LEN = 140;
 
-    @Override
+    @Transactional
     public CategoryDTO createNewCategory(CategoryReq req) {
-        if (categoryRepository.existsByNameIgnoreCase(req.getName())){
-            throw  ApiException.conflict(
-                    ApiErrorCode.CATEGORY_NAME_EXISTS
-                    ,"Category name already exists: %s",
-                    req.getName()
-                );
+
+        String enName = Optional.ofNullable(req.getName())
+                .map(m -> m.get("en"))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .orElseThrow(() -> ApiException.badRequest(
+                        INVALID_REQUEST,
+                        "Category English name (name.en) is required"
+                ));
+
+        String slug = SlugUtil.slugify(enName, SLUG_MAX_LEN)
+                .orElseThrow(() -> ApiException.badRequest(
+                        INVALID_REQUEST,
+                        "Cannot generate slug from name.en"
+                ));
+
+        if (categoryRepository.existsBySlugIgnoreCase(slug)) {
+            throw ApiException.conflict(
+                    CATEGORY_SLUG_EXISTS,
+                    "Slug already exists: %s",
+                    slug
+            );
         }
-
         Category category = categoryMapper.toEntity(req);
-
-        String generateSlugName = generateSlug(req.getName());
-        category.setSlug(generateSlugName);
+        category.setSlug(slug);
         category.setStatus(Status.ACTIVE);
-        categoryRepository.save(category);
+        category.setSortOrder(Objects.requireNonNullElse(category.getSortOrder(), 0));
 
-        return categoryMapper.toDto(category);
+        return categoryMapper.toDto(categoryRepository.save(category));
     }
 
-    private String generateSlug(String name) {
-        return EntityGenerator.generateSlug(name);
-    }
 
     @Override
     public List<CategoryDTO> getAllCategory() {
@@ -96,6 +112,9 @@ public class CategoryServiceImpl implements CategoryService {
                         id.toString()
                 ));
     }
+
+
+
     @Override
     public String softDeleteById(Long id) {
         return categoryRepository.findById(id)
@@ -123,6 +142,5 @@ public class CategoryServiceImpl implements CategoryService {
                         id.toString()
                 ));
     }
-
 
 }

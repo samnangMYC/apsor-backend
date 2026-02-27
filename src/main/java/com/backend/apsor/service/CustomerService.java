@@ -32,6 +32,4 @@ public interface CustomerService {
     CustomerMediaDTO updateByIdFromAdmin(Long customerId, MultipartFile file);
 
     String deleteAvatarByMediaIdFromAdmin(Long customerId,Long mediaId);
-
-    ProviderMediaDTO uploadNewAvatar(Jwt jwt, MultipartFile file);
 }

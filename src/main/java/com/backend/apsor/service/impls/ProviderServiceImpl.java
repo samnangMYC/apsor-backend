@@ -5,11 +5,9 @@ import com.backend.apsor.enums.ApiErrorCode;
 import com.backend.apsor.enums.MediaPurpose;
 import com.backend.apsor.enums.ProviderStatus;
 import com.backend.apsor.exceptions.ApiException;
-import com.backend.apsor.mapper.MediaAssetMapper;
 import com.backend.apsor.mapper.ProviderMapper;
 import com.backend.apsor.mapper.ProviderMediaAssetMapper;
 import com.backend.apsor.payloads.dtos.AdminProviderDTO;
-import com.backend.apsor.payloads.dtos.MediaAssetDTO;
 import com.backend.apsor.payloads.dtos.ProviderDTO;
 import com.backend.apsor.payloads.dtos.ProviderMediaDTO;
 import com.backend.apsor.payloads.requests.AdminProviderReq;
@@ -19,8 +17,8 @@ import com.backend.apsor.repositories.MediaAssetRepo;
 import com.backend.apsor.repositories.ProviderMediaAssetRepo;
 import com.backend.apsor.repositories.ProviderRepo;
 import com.backend.apsor.repositories.UserRepo;
-import com.backend.apsor.service.storage.MediaStorage;
 import com.backend.apsor.service.ProviderService;
+import com.backend.apsor.service.storage.MediaStorage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -29,9 +27,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static com.backend.apsor.util.MediaUtils.*;
-import static com.backend.apsor.util.MediaUtils.createAndSaveMediaAsset;
-import static com.backend.apsor.util.MediaUtils.generateObjectKey;
-import static com.backend.apsor.util.MediaUtils.uploadToStorage;
 
 @Service
 @RequiredArgsConstructor
@@ -43,7 +38,6 @@ public class ProviderServiceImpl implements ProviderService {
     private final UserServiceImpl userServiceImpl;
     private final MediaStorage mediaStorage;
     private final StorageProps storageProps;
-    private final MediaAssetMapper mediaAssetMapper;
     private final ProviderMediaAssetMapper providerMediaAssetMapper;
     private final MediaAssetRepo mediaAssetRepo;
     private final ProviderMediaAssetRepo providerMediaAssetRepo;

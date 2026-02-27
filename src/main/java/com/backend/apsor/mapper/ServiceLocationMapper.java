@@ -9,7 +9,7 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(config = MapStructConfig.class)
+@Mapper(config = MapStructConfig.class,uses =  {LocationMapper.class})
 public interface ServiceLocationMapper {
 
     @Mapping(target = "line1", source = "location.line1")

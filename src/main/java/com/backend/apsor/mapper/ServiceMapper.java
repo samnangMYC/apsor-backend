@@ -10,7 +10,11 @@ import org.mapstruct.MappingTarget;
 
 import java.util.List;
 
-@Mapper(config =  MapStructConfig.class)
+@Mapper(config =  MapStructConfig.class,uses = {
+        ServiceAvailabilityMapper.class,
+        ServiceLocationMapper.class,
+        ServicePriceMapper.class,
+        ServiceMediaMapper.class })
 public interface ServiceMapper {
 
     @Mapping(target = "id", ignore = true)
@@ -30,6 +34,7 @@ public interface ServiceMapper {
     @Mapping(target = "locations", ignore = true)
     @Mapping(target = "medias", ignore = true)
     @Mapping(target = "prices", ignore = true)
+    @Mapping(target = "availabilities", ignore = true)
     Services toEntity(ServiceCreateReq req);
 
     @Mapping(target = "id", ignore = true)
@@ -49,11 +54,16 @@ public interface ServiceMapper {
     @Mapping(target = "locations", ignore = true)
     @Mapping(target = "medias", ignore = true)
     @Mapping(target = "prices", ignore = true)
+    @Mapping(target = "availabilities", ignore = true)
     Services toEntity(ServiceUpdateReq req);
 
     @Mapping(target = "categoryId", source = "category.id")
     @Mapping(target = "subCategoryId",source = "subcategory.id")
     @Mapping(target = "providerId", source = "provider.id")
+    @Mapping(target = "price", source = "prices")
+    @Mapping(target = "availability", source = "availabilities")
+    @Mapping(target = "location", source = "locations")
+    @Mapping(target = "assets", source = "medias")
     ServiceDTO toDTO(Services services);
 
     void update(Services services, @MappingTarget Services servicesUpdate);

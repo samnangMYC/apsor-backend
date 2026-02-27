@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Data
 @Builder
@@ -25,9 +26,10 @@ import java.time.Instant;
 })
 public class CategoryDTO {
     private Long id;
-    private String name;
+    private Map<String, String> name;
+    private Map<String, String> description;
     private String slug;
-    private String description;
+    private String imageUrl;
     private Integer sortOrder;
     private Status status;
     private Instant createdAt;

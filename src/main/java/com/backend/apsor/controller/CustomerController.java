@@ -74,30 +74,6 @@ public class CustomerController {
 
     }
 
-    @PostMapping("/avatar")
-    public ResponseEntity<ProviderMediaDTO> createAvatar(@AuthenticationPrincipal Jwt jwt,
-                                                      @RequestPart MultipartFile file) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(
-                customerService.uploadNewAvatar(jwt,file)
-        );
-    }
-//    @GetMapping("/avatar")
-//    public ResponseEntity<ProviderMediaDTO> fetchAvatar(@AuthenticationPrincipal Jwt jwt) {
-//        return ResponseEntity.ok(customerService.getAvatarByJwt(jwt));
-//    }
-//
-//    @PatchMapping("/avatar")
-//    public ResponseEntity<ProviderMediaDTO> updateAvatar(@AuthenticationPrincipal Jwt jwt, @RequestPart MultipartFile file) {
-//        log.debug("Updating provider resource : {}", file);
-//        return ResponseEntity.ok(customerService.updateProviderAvatar(jwt,file));
-//    }
-//
-//    @DeleteMapping("{mediaId}/avatar")
-//    public ResponseEntity<String> deleteAvatar(@AuthenticationPrincipal Jwt jwt,
-//                                               @PathVariable Long mediaId) {
-//        log.debug("Deleting provider resource : {}", jwt);
-//        return ResponseEntity.ok(customerService.deleteAvatarByMediaId(jwt,mediaId));
-//    }
 
 
 }

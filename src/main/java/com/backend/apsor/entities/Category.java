@@ -7,18 +7,27 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Builder
-@Table(name = "categories")
+@Table(
+        name = "categories",
+        indexes = {
+        @Index(name = "ix_category_slug", columnList = "slug"),
+        @Index(name = "ix_category_status", columnList = "status"),
+        @Index(name = "ix_category_sort_order", columnList = "sort_order")
+})
 public class Category {
 
     @Id
@@ -26,15 +35,17 @@ public class Category {
     private Long id;
 
     // Display name: "Cleaning & Maid Services"
-    @Column(nullable = false, length = 120)
-    private String name;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "name", columnDefinition = "jsonb", nullable = false)
+    private Map<String, String> name;
 
     // URL-friendly unique identifier: "cleaning-maid-services"
     @Column(nullable = false, length = 140, unique = true)
     private String slug;
 
-    @Column(length = 500)
-    private String description;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "description", columnDefinition = "jsonb")
+    private Map<String, String> description;
 
     // For custom ordering in UI lists
     @Column(nullable = false)
@@ -58,6 +69,9 @@ public class Category {
     public void prePersist() {
         status = Status.ACTIVE;
     }
+
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CategoryMedia> categoryMedia  = new ArrayList<>();
 
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SubCategory> subCategories = new ArrayList<>();
